@@ -68,12 +68,19 @@ high_votes = votes > func_threshold
 votes = votes[high_votes]
 rho_values = rho_values[high_votes]
 
-"""
+bars_start = rho_values[::2]
+bars_end = rho_values[1::2]
+
+bars_width = bars_end - bars_start
+
 rho_comp = np.arange(rho_values[0], rho_values[-1] + 1)
 votes_comp = np.zeros(rho_comp.shape)
 
 votes_indices = np.searchsorted(rho_comp, rho_values)
 votes_comp[votes_indices] = votes
+
+bars = np.nonzero(votes_comp)
+print(votes_comp)
 
 # the histogram of the data
 ax.plot(rho_comp, votes_comp, '-o')
@@ -83,4 +90,3 @@ plt.title('90º Angle')
 plt.show()
 # cv2.imshow("Lines", image)
 # cv2.waitKey(0)
-"""
