@@ -2,15 +2,22 @@
 import collections
 import cv2
 import dft
+import functions
 import math
 import numpy as np
+import time
 
 from PIL import Image
 
+def current_milli_time():
+    return time.time()
 
 def run(in_file, out_file, blur_strength=(7, 7)):
+    t = current_milli_time()
     dft.run(in_file, 'results/corrected.png')
-    img = 'results/corrected.png'
+    dft.run('results/corrected.png', 'results/corrected.png')
+    print('Tarda ' + str(current_milli_time() - t) + ' s.')
+    '''img = 'results/corrected.png'
 
     image = cv2.imread(img)
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -67,19 +74,18 @@ def run(in_file, out_file, blur_strength=(7, 7)):
 
     out = cv2.cvtColor(out, cv2.COLOR_BGR2GRAY)
 
-    # cv2.imshow("Out", out)
+    cv2.imshow("Out", out)
+    cv2.waitKey(0)
 
     (_, thresh) = cv2.threshold(
         out, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
 
     thresh = np.uint8(thresh)
-    # cv2.imshow("thresh", thresh)
 
     canny = np.copy(thresh)
     cv2.Canny(thresh, 200, 100, canny, 3, True)
 
-    # cv2.imshow("Canny", canny)
-    # cv2.waitKey(0)
+
 
     rhos = np.array([])
     thetas = np.array([])
@@ -122,29 +128,13 @@ def run(in_file, out_file, blur_strength=(7, 7)):
     angle = -(np.rad2deg(theta))
     print(np.rad2deg(theta))
 
-    w = out.shape[1]
-    h = out.shape[0]
-    rangle = np.deg2rad(angle)  # angle in radians
-    # calculate new image width and height
-    nw = (abs(np.sin(rangle) * h) + abs(np.cos(rangle) * w))
-    nh = (abs(np.cos(rangle) * h) + abs(np.sin(rangle) * w))
-    # get rotation matrix
-    rot_mat = cv2.getRotationMatrix2D((nw / 2, nh / 2), angle, 1)
-    # calculate the move from the old center to the new center combined
-    # with the rotation
-    rot_move = np.dot(rot_mat, np.array([(nw - w) / 2, (nh - h) / 2, 0]))
-    # the move only affects the translation, so update the translation
-    # part of the transform
-    rot_mat[0, 2] += rot_move[0]
-    rot_mat[1, 2] += rot_move[1]
-    out = cv2.warpAffine(out, rot_mat,
-                         (int(math.ceil(nw)), int(math.ceil(nh))))
+    out = functions.rotate_about_center(out, angle)
 
     x, y = np.nonzero(out)
     out = out[x.min():x.max() + 1, y.min():y.max() + 1]
 
     processed_img = Image.fromarray(out)
-    processed_img.save(out_file)
+    processed_img.save(out_file)'''
 
 if __name__ == "__main__":
-    run('resources/barcode_gg.png', 'results/barcode_gg.jpg', (3, 3))
+    run('resources/borr_gir.png', 'results/out.jpg', (3, 3))
