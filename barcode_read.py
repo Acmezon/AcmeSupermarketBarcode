@@ -1,10 +1,11 @@
 # -*-coding:utf-8-*-
 import collections
 import cv2
+import preproc
 import numpy as np
 
 
-def decode_image(path, function_threshold=55):
+def decode_image(path, function_threshold=55, blur_strength=(7, 7)):
     """
     Toma la imagen de un codigo de barras y lo decodifica, devolviendo
     un vector como el siguiente:
@@ -16,8 +17,10 @@ def decode_image(path, function_threshold=55):
     expresados en relacion al grosor base
     """
 
+    preproc.run(path, 'results/barcode_processed.jpg', blur_strength)
+
     # Se lee la imagen y se pasa a gris
-    image = cv2.imread(path)
+    image = cv2.imread('results/barcode_processed.jpg')
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
     # Se le aplica el detector de bordes de Canny
@@ -34,7 +37,8 @@ def decode_image(path, function_threshold=55):
     threshold = 1
     while True:
         lines = cv2.HoughLines(
-            canny, 1, np.pi / 45, threshold, min_theta=0, max_theta=np.pi / 2)
+            canny, 1, np.pi / 45, threshold, min_theta=-(np.pi / 6),
+            max_theta=np.pi / 6)
         if lines is None:
             break
 

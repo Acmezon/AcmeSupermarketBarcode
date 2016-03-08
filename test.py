@@ -32,7 +32,8 @@ thetas = np.array([])
 threshold = 1
 while True:
     lines = cv2.HoughLines(
-        canny, 1, np.pi / 45, threshold, min_theta=0, max_theta=np.pi / 2)
+            canny, 1, np.pi / 45, threshold, min_theta=-(np.pi / 6),
+            max_theta=np.pi / 6)
     if lines is None:
         break
 
