@@ -12,7 +12,8 @@ def current_milli_time():
     return time.time()
 
 
-func_threshold = 55
+function_threshold = 55
+
 t = current_milli_time()
 
 image = cv2.imread('resources/barcode.jpg')
@@ -62,9 +63,7 @@ for key, val in accum.items():
         rho_values = np.append(rho_values, np.array([key[0]]))
         votes = np.append(votes, np.array([val]))
 
-print(current_milli_time() - t)
-
-high_votes = votes > func_threshold
+high_votes = votes > function_threshold
 votes = votes[high_votes]
 rho_values = rho_values[high_votes]
 
@@ -79,9 +78,33 @@ votes_comp = np.zeros(rho_comp.shape)
 votes_indices = np.searchsorted(rho_comp, rho_values)
 votes_comp[votes_indices] = votes
 
-bars = np.nonzero(votes_comp)
-print(votes_comp)
+max_height = np.amax(votes_comp)
+high_lines = votes_comp > (max_height - 10)
+votes_comp[high_lines] = max_height
 
+min_height = np.amin(votes_comp[np.nonzero(votes_comp)])
+# print(min_height)
+
+low_lines = np.where(votes_comp < (min_height + 15))
+votes_comp[np.intersect1d(low_lines, np.nonzero(votes_comp))] = min_height
+
+high_lines = np.where(votes_comp == max_height)
+control_first = high_lines[0][0:4]
+control_end = high_lines[0][-4:]
+control_middle = high_lines[0][8:12]
+
+base_width = np.around(np.mean(
+    np.concatenate((np.diff(control_first),
+                    np.diff(control_middle),
+                    np.diff(control_end)))))
+
+lines_width = np.around(np.diff(np.nonzero(votes_comp)) / base_width)
+
+print(lines_width)
+
+print(current_milli_time() - t)
+
+bars = np.nonzero(votes_comp)
 # the histogram of the data
 ax.plot(rho_comp, votes_comp, '-o')
 plt.xlabel('rho')
