@@ -5,8 +5,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import time
 
-from mpl_toolkits.mplot3d import Axes3D
-
 
 def current_milli_time():
     return time.time()
@@ -58,8 +56,19 @@ votes = np.array([])
 
 accum = collections.OrderedDict(sorted(accum.items(), key=lambda k: k[0][0]))
 
+accum_values = collections.defaultdict(int)
+for k, v in accum.items():
+    accum_values[k[1]] += v
+
+accum_values = np.array(
+    list(accum_values.items()), dtype=[('x', 'f4'), ('y', 'i4')])
+
+theta = accum_values[np.argsort(accum_values, order=('y', 'x'))[-1]][0]
+
+print(theta)
+
 for key, val in accum.items():
-    if key[1] == 0.0:
+    if key[1] == theta:
         rho_values = np.append(rho_values, np.array([key[0]]))
         votes = np.append(votes, np.array([val]))
 
@@ -83,7 +92,7 @@ high_lines = votes_comp > (max_height - 10)
 votes_comp[high_lines] = max_height
 
 min_height = np.amin(votes_comp[np.nonzero(votes_comp)])
-# print(min_height)
+
 
 low_lines = np.where(votes_comp < (min_height + 15))
 votes_comp[np.intersect1d(low_lines, np.nonzero(votes_comp))] = min_height
@@ -99,10 +108,6 @@ base_width = np.around(np.mean(
                     np.diff(control_end)))))
 
 lines_width = np.around(np.diff(np.nonzero(votes_comp)) / base_width)
-
-print(lines_width)
-
-print(current_milli_time() - t)
 
 bars = np.nonzero(votes_comp)
 # the histogram of the data
