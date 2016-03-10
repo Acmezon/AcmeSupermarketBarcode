@@ -15,7 +15,7 @@ def translate_to_binary(lines_spaces_vector):
         for n in lines_spaces_vector:
             r = np.append(r, np.repeat(int(is_line), n))
             is_line = not is_line
-
+    print(r)
     return r
 
 
