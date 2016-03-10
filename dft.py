@@ -13,11 +13,12 @@ def run(in_file, n=2):
             Corrected image.
     """
 
-    rotated_img = cv2.imread(in_file)
+    image = cv2.imread(in_file, 0)
 
+    result = np.copy(image)
     for i in range(0, n):
-        gray = cv2.cvtColor(rotated_img, cv2.COLOR_BGR2GRAY)
-        dft = cv2.dft(np.float32(gray), flags=cv2.DFT_COMPLEX_OUTPUT)
+
+        dft = cv2.dft(np.float32(result), flags=cv2.DFT_COMPLEX_OUTPUT)
         dft_shift = np.fft.fftshift(dft)
 
         magnitude_spectrum = 20*np.log(cv2.magnitude(dft_shift[:, :, 0],
@@ -44,8 +45,6 @@ def run(in_file, n=2):
             m_denominator = x2 - x1
 
             angle = np.rad2deg(math.atan2(m_numerator, m_denominator))
-            rotated_img = functions.rotate_about_center(rotated_img, angle)
+            result = functions.rotate_about_center(result, angle)
 
-    b, g, r = cv2.split(rotated_img)
-    rotated_img = cv2.merge([r, g, b])
-    return rotated_img
+    return result

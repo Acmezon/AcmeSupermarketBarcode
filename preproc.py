@@ -14,13 +14,17 @@ def run(in_file, blur_strength=(7, 7), inclination_n=4):
         Output:
             Processed image
     """
-    image = dft.run(in_file, 5)
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    image = dft.run(in_file, 4)
+
+    plt.subplot(111), plt.imshow(image ,cmap = 'gray')
+    plt.title('image'), plt.xticks([]), plt.yticks([])
+
+    plt.show()
 
     # compute the Scharr gradient magnitude representation of the images
     # in both the x and y direction
-    gradX = cv2.Sobel(gray, ddepth=cv2.CV_32F, dx=1, dy=0, ksize=-1)
-    gradY = cv2.Sobel(gray, ddepth=cv2.CV_32F, dx=0, dy=1, ksize=-1)
+    gradX = cv2.Sobel(image, ddepth=cv2.CV_32F, dx=1, dy=0, ksize=-1)
+    gradY = cv2.Sobel(image, ddepth=cv2.CV_32F, dx=0, dy=1, ksize=-1)
 
     # subtract the y-gradient from the x-gradient
     gradient = cv2.subtract(gradX, gradY)
@@ -28,6 +32,12 @@ def run(in_file, blur_strength=(7, 7), inclination_n=4):
 
     # blur and threshold the image
     blurred = cv2.blur(gradient, blur_strength)
+
+    plt.subplot(111), plt.imshow(blurred ,cmap = 'gray')
+    plt.title('blurred'), plt.xticks([]), plt.yticks([])
+
+    plt.show()
+
     (_, thresh) = cv2.threshold(blurred, 225, 255, cv2.THRESH_BINARY)
 
     # closing operation. kernel 15x15

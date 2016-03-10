@@ -2,6 +2,8 @@ import cv2
 import math
 import numpy as np
 
+from matplotlib import pyplot as plt
+
 def rotate_about_center(img, angle, scale=1.):
 	w = img.shape[1]
 	h = img.shape[0]
@@ -23,6 +25,11 @@ def rotate_about_center(img, angle, scale=1.):
 	nh = int(math.ceil(nh))
 
 	rotated = cv2.warpAffine(img, rot_mat, (int(math.ceil(nw)), int(math.ceil(nh))))
-	cropped = rotated[nh-h:h-nh, nw-w:w-nw]
+
+	if nh-h!=0:
+		#If crop necessary
+		cropped = rotated[nh-h:h-nh, nw-w:w-nw]
+	else:
+		cropped = rotated
 
 	return cropped
