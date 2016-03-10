@@ -6,6 +6,7 @@ def translate_to_binary(lines_spaces_vector):
     """
     r = []
     is_line = True
+    #print(lines_spaces_vector)
 
     if len(np.where(np.logical_or(lines_spaces_vector < 1,
                                   lines_spaces_vector > 4))[0]):

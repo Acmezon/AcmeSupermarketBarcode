@@ -115,7 +115,7 @@ def decode_image(path, function_threshold=0, blur_strength=(7, 7)):
     # decodificacion falla
 
     # Se devuelve el resultado
-    return lines_width
+    return lines_width[0]
 
 
 def canny_edge(img, t_1, t_2, aperture=3, l2gradient=True):
