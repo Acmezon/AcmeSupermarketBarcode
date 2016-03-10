@@ -31,25 +31,23 @@ def run(in_file, blur_strength=(7, 7), inclination_n=4):
     (_, thresh) = cv2.threshold(blurred, 225, 255, cv2.THRESH_BINARY)
 
     # closing operation. kernel 15x15
-    kernel = np.ones((20,20),np.uint8)
+    kernel = np.ones((20, 20), np.uint8)
     closed = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel)
 
-    plt.subplot(2,2,1), plt.imshow(image ,cmap = 'gray')
+    plt.subplot(4,2,1), plt.imshow(image ,cmap = 'gray')
     plt.title('Original'), plt.xticks([]), plt.yticks([])
-    plt.subplot(2,2,2), plt.imshow(gradient ,cmap = 'gray')
+    plt.subplot(4,2,2), plt.imshow(gradient ,cmap = 'gray')
     plt.title('Gradient'), plt.xticks([]), plt.yticks([])
-    plt.subplot(2,2,3), plt.imshow(thresh ,cmap = 'gray')
+    plt.subplot(4,2,3), plt.imshow(thresh ,cmap = 'gray')
     plt.title('Threshold'), plt.xticks([]), plt.yticks([])
-    plt.subplot(2,2,4), plt.imshow(closed ,cmap = 'gray')
+    plt.subplot(4,2,4), plt.imshow(closed ,cmap = 'gray')
     plt.title('Closed'), plt.xticks([]), plt.yticks([])
-
-    plt.show()
 
     # find the contours in the thresholded image, then sort the contours
     # by their area, keeping only the largest one
     _, cnts, _ = cv2.findContours(closed.copy(),cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
     c = sorted(cnts, key=cv2.contourArea, reverse=True)[0]
- 
+
     # compute the rotated bounding box of the largest contour
     rect = cv2.minAreaRect(c)
     box = np.int0(cv2.boxPoints(rect))
@@ -70,13 +68,13 @@ def run(in_file, blur_strength=(7, 7), inclination_n=4):
     x, y = np.nonzero(out)
     thresh2 = out[x.min():x.max() + 1, y.min():y.max() + 1]
 
-    plt.subplot(2,2,1), plt.imshow(closed ,cmap = 'gray')
+    plt.subplot(4, 2, 5), plt.imshow(closed, cmap='gray')
     plt.title('closed'), plt.xticks([]), plt.yticks([])
-    plt.subplot(2,2,2), plt.imshow(mask ,cmap = 'gray')
+    plt.subplot(4, 2, 6), plt.imshow(mask, cmap='gray')
     plt.title('Mask'), plt.xticks([]), plt.yticks([])
-    plt.subplot(2,2,3), plt.imshow(out ,cmap = 'gray')
+    plt.subplot(4, 2, 7), plt.imshow(out, cmap='gray')
     plt.title('Out threshold'), plt.xticks([]), plt.yticks([])
-    plt.subplot(2,2,4), plt.imshow(thresh2 ,cmap = 'gray')
+    plt.subplot(4, 2, 8), plt.imshow(thresh2, cmap='gray')
     plt.title('Out + Cropped'), plt.xticks([]), plt.yticks([])
 
     plt.show()

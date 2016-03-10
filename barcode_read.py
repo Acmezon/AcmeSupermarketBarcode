@@ -2,10 +2,12 @@
 import collections
 import cv2
 import preproc
+import math
 import numpy as np
 import matplotlib.pyplot as plt
 
-def decode_image(path, function_threshold=55, blur_strength=(7, 7)):
+
+def decode_image(path, function_threshold=0, blur_strength=(7, 7)):
     """
     Toma la imagen de un codigo de barras y lo decodifica, devolviendo
     un vector como el siguiente:
@@ -19,8 +21,8 @@ def decode_image(path, function_threshold=55, blur_strength=(7, 7)):
 
     image = preproc.run(path, blur_strength)
 
-    '''# Se le aplica el detector de bordes de Canny
-    canny = canny_edge(image, 100, 200)
+    # Se le aplica el detector de bordes de Canny
+    canny = canny_edge(image, 200, 100)
 
     # Se inicializa un vector de rhos y thetas que iran guardando los
     # valores encontrados para los distintos umbrales
@@ -33,7 +35,7 @@ def decode_image(path, function_threshold=55, blur_strength=(7, 7)):
     threshold = 1
     while True:
         lines = cv2.HoughLines(
-            canny, 1, np.pi / 45, threshold, min_theta=-(np.pi / 6),
+            canny, 1, np.pi / 90, threshold, min_theta=-(np.pi / 6),
             max_theta=np.pi / 6)
         if lines is None:
             break
@@ -80,13 +82,6 @@ def decode_image(path, function_threshold=55, blur_strength=(7, 7)):
     votes_indices = np.searchsorted(rho_comp, rho_values)
     votes_comp[votes_indices] = votes
 
-    fig, ax = plt.subplots()
-    ax.plot(rho_comp, votes_comp, '-o')
-    plt.xlabel('rho')
-    plt.ylabel('height')
-    plt.title('90º Angle')
-    plt.show()
-
     # Se normalizan las lineas para que todas las "largas" tengan el mismo
     # valor y las bajas tambien
     max_height = np.amax(votes_comp)
@@ -96,10 +91,7 @@ def decode_image(path, function_threshold=55, blur_strength=(7, 7)):
     min_height = np.amin(votes_comp[np.nonzero(votes_comp)])
     low_lines = np.where(votes_comp < (min_height + 15))
     votes_comp[np.intersect1d(low_lines, np.nonzero(votes_comp))] = min_height
-
-    print(rho_comp)
-    print(votes_comp)
-
+    
     # Se buscan las zonas de control que se corresponden con las lineas mas
     # altas y se descartan las que codifican numeros
     high_lines = np.where(votes_comp == max_height)
@@ -123,7 +115,7 @@ def decode_image(path, function_threshold=55, blur_strength=(7, 7)):
     # decodificacion falla
 
     # Se devuelve el resultado
-    return lines_width'''
+    return lines_width
 
 
 def canny_edge(img, t_1, t_2, aperture=3, l2gradient=True):
@@ -131,12 +123,24 @@ def canny_edge(img, t_1, t_2, aperture=3, l2gradient=True):
     Aplica el detector de bordes Canny a la imagen de entrada.
     Primero la binariza y luego aplica el detector
     """
+
+    cv2.imshow('img', img)
     (_, thresh) = cv2.threshold(
         img, 230, 255, cv2.THRESH_BINARY)
 
     thresh = np.uint8(thresh)
 
-    canny = np.copy(thresh)
-    cv2.Canny(thresh, t_1, t_2, canny, aperture, l2gradient)
+    percentage = 100
+    kernel_height = np.around(thresh.shape[0] * (percentage / 100))
+
+    kernel = np.ones((kernel_height, 1), np.uint8)
+    opened = cv2.dilate(thresh, kernel)
+    opened = cv2.erode(opened, kernel)
+
+    kernel = np.ones((1, 2), np.uint8)
+    opened = cv2.dilate(opened, kernel)
+
+    canny = np.copy(opened)
+    cv2.Canny(opened, t_1, t_2, canny, aperture, l2gradient)
 
     return canny
