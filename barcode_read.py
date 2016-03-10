@@ -3,6 +3,7 @@ import collections
 import cv2
 import preproc
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 def decode_image(path, function_threshold=55, blur_strength=(7, 7)):
@@ -48,27 +49,24 @@ def decode_image(path, function_threshold=55, blur_strength=(7, 7)):
 
         threshold += 1
 
-    accum = {}
-    for i in range(len(rhos)):
-        if (rhos[i], thetas[i]) in accum:
-            accum[(rhos[i], thetas[i])] += 1
-        else:
-            accum[(rhos[i], thetas[i])] = 1
+    t_votes = collections.Counter(thetas)
+    most_common_theta = t_votes.most_common(1)[0][0]
+
+    lines = np.fromiter(zip(rhos, thetas), dtype=[('r', 'i4'), ('t', 'f4')])
+    lines = np.sort(lines[lines['t'] == most_common_theta], order=['r', 't'])
+
+    rho_values, _ = zip(*lines)
+    r_votes = collections.Counter(rho_values)
 
     rho_values = np.array([])
     votes = np.array([])
 
     # Se ordena el diccionario por la distancia de las lineas (rho)
     accum = collections.OrderedDict(
-        sorted(accum.items(), key=lambda k: k[0][0]))
+        sorted(r_votes.items(), key=lambda k: k[0]))
 
-    # Se toman las lineas cuyo rho es 0, es decir las perpendiculares al eje
-    # horizontal, y se guarda su valor de rho y su numero de votos
-    for key, val in accum.items():
-        # TODO: Y si no es totalmente perpendicular?
-        if key[1] == 0.0:
-            rho_values = np.append(rho_values, np.array([key[0]]))
-            votes = np.append(votes, np.array([val]))
+    rho_values, votes = zip(*accum.items())
+    rho_values, votes = np.array(rho_values), np.array(votes)
 
     # Se filtran las lineas que no pasen un umbral y se llevan a 0 para
     # eliminar ruido
@@ -87,6 +85,13 @@ def decode_image(path, function_threshold=55, blur_strength=(7, 7)):
     votes_indices = np.searchsorted(rho_comp, rho_values)
     votes_comp[votes_indices] = votes
 
+    fig, ax = plt.subplots()
+    ax.plot(rho_comp, votes_comp, '-o')
+    plt.xlabel('rho')
+    plt.ylabel('height')
+    plt.title('90º Angle')
+    plt.show()
+
     # Se normalizan las lineas para que todas las "largas" tengan el mismo
     # valor y las bajas tambien
     max_height = np.amax(votes_comp)
@@ -96,6 +101,9 @@ def decode_image(path, function_threshold=55, blur_strength=(7, 7)):
     min_height = np.amin(votes_comp[np.nonzero(votes_comp)])
     low_lines = np.where(votes_comp < (min_height + 15))
     votes_comp[np.intersect1d(low_lines, np.nonzero(votes_comp))] = min_height
+
+    print(rho_comp)
+    print(votes_comp)
 
     # Se buscan las zonas de control que se corresponden con las lineas mas
     # altas y se descartan las que codifican numeros

@@ -143,12 +143,3 @@ def translate(vector):
 
 def current_milli_time():
     return time.time()
-
-vector = np.array([1, 1, 1, 3, 2, 1, 1, 1, 4, 1, 1, 1, 1, 1, 4, 3, 2, 1, 1, 3, 2, 1, 1, 3, 2, 1, 1,
-                   1, 1, 1, 1, 1, 2, 1, 2, 2, 3, 1, 1, 2, 2, 2, 2, 1, 1, 1, 3, 2, 1, 2, 3, 1, 2, 1, 2, 2, 1, 1, 1, ])
-
-t = current_milli_time()
-y = translate(vector)
-
-print('Tarda ' + str(current_milli_time() - t) + ' s.')
-print('Resultado: ' + y)

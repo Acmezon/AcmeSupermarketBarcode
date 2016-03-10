@@ -1,36 +1,16 @@
 # -*-coding:utf-8-*-
-
-import cv2
-import numpy as np
-import matplotlib.pyplot as plt
-
-from skimage.transform import hough_line
+import barcode_read
+import translate
 
 
 def main():
-    image = cv2.imread('resources/barcode.png')
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    lines = barcode_read.decode_image('resources/barcode_g.jpg', blur_strength=(3,3))
 
-    out, angles, d = hough_line(gray)
+    print(lines)
 
-    angles = angles * 100
+    number = translate.translate(lines)
 
-    angles = angles.astype(int)
-
-    angles = angles / 100
-
-    angle = np.where(angles == 0)[0][1]
-    ys = out[:, angle]
-
-    fig, ax = plt.subplots()
-
-    # the histogram of the data
-    ax.bar(d, ys)
-
-    plt.xlabel('rho')
-    plt.ylabel('height')
-    plt.title('90º Angle')
-    plt.show()
+    print(number)
 
 if __name__ == "__main__":
     main()

@@ -3,21 +3,21 @@ import collections
 import cv2
 import dft
 import functions
-import math
 import numpy as np
 import time
 
 from PIL import Image
 
+
 def current_milli_time():
     return time.time()
 
+
 def run(in_file, out_file, blur_strength=(7, 7)):
-    t = current_milli_time()
     dft.run(in_file, 'results/corrected.png')
     dft.run('results/corrected.png', 'results/corrected.png')
-    print('Tarda ' + str(current_milli_time() - t) + ' s.')
-    '''img = 'results/corrected.png'
+
+    img = 'results/corrected.png'
 
     image = cv2.imread(img)
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -67,25 +67,32 @@ def run(in_file, out_file, blur_strength=(7, 7)):
     cv2.drawContours(mask, [box], -1, (0, 255, 0), -1)
 
     out = np.zeros_like(image)
+    out.fill(255)
     in_border = np.where(mask == 255)
 
     out[in_border[0], in_border[1], in_border[2]] = \
         image[in_border[0], in_border[1], in_border[2]]
 
     out = cv2.cvtColor(out, cv2.COLOR_BGR2GRAY)
-
-    cv2.imshow("Out", out)
-    cv2.waitKey(0)
-
     (_, thresh) = cv2.threshold(
+        out, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+
+    x, y = np.nonzero(thresh)
+    thresh = thresh[x.min():x.max() + 1, y.min():y.max() + 1]
+
+    processed_img = Image.fromarray(thresh)
+    processed_img.save(out_file)
+
+    # cv2.imshow("Out", out)
+    # cv2.waitKey(0)
+
+    """(_, thresh) = cv2.threshold(
         out, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
 
     thresh = np.uint8(thresh)
 
     canny = np.copy(thresh)
     cv2.Canny(thresh, 200, 100, canny, 3, True)
-
-
 
     rhos = np.array([])
     thetas = np.array([])
@@ -104,29 +111,14 @@ def run(in_file, out_file, blur_strength=(7, 7)):
 
         threshold += 1
 
-    accum = {}
-    for i in range(len(rhos)):
-        if (rhos[i], thetas[i]) in accum:
-            accum[(rhos[i], thetas[i])] += 1
-        else:
-            accum[(rhos[i], thetas[i])] = 1
+    accum = collections.Counter(list(zip(rhos, thetas)))
 
-    accum = collections.OrderedDict(
-        sorted(accum.items(), key=lambda k: k[0][0]))
-
-    accum_values = collections.defaultdict(int)
-    for k, v in accum.items():
-        accum_values[k[1]] += v
-
-    accum_values = np.array(
-        list(accum_values.items()), dtype=[('x', 'f4'), ('y', 'i4')])
-
-    theta = accum_values[np.argsort(accum_values, order=('y', 'x'))[-1]][0]
+    theta = accum.most_common(1)[0][0][1]
 
     print(theta)
 
     angle = -(np.rad2deg(theta))
-    print(np.rad2deg(theta))
+    # print(np.rad2deg(theta))
 
     out = functions.rotate_about_center(out, angle)
 
@@ -134,7 +126,4 @@ def run(in_file, out_file, blur_strength=(7, 7)):
     out = out[x.min():x.max() + 1, y.min():y.max() + 1]
 
     processed_img = Image.fromarray(out)
-    processed_img.save(out_file)'''
-
-if __name__ == "__main__":
-    run('resources/borr_gir.png', 'results/out.jpg', (3, 3))
+    processed_img.save(out_file)"""
