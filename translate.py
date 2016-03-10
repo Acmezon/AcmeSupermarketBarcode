@@ -1,6 +1,4 @@
 import numpy as np
-import time
-
 
 def translate_to_binary(lines_spaces_vector):
     """
@@ -18,7 +16,6 @@ def translate_to_binary(lines_spaces_vector):
             is_line = not is_line
 
     return r
-
 
 def translate_byte(binary_code, side):
     """
@@ -63,8 +60,12 @@ def translate_byte(binary_code, side):
     else:
         raise ValueError("Side param incorrect.")
 
-
 def checksum(barcode):
+    """
+    Computes a 1D barcode checksum
+        Output:
+            bool. Returns if checksum is correct.
+    """
     # 1. Add the values of the digits in positions 1, 3, 5, 7, 9, and 11.
     term1 = int(barcode[0]) + int(barcode[2]) + int(barcode[4]) + \
             int(barcode[6]) + int(barcode[8]) + int(barcode[10])
@@ -79,7 +80,6 @@ def checksum(barcode):
     # result in step 4, produces a multiple of 10.
     term5 = ((10 - term4) % 10) % 10
     return str(term5) == barcode[-1]
-
 
 def translate(vector):
     """
@@ -139,7 +139,3 @@ def translate(vector):
             "Error: Wrong format. Incorrent barcode \
             length or frontier bars not matching.")
         return -1
-
-
-def current_milli_time():
-    return time.time()

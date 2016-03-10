@@ -1,25 +1,20 @@
-# import the necessary packages
-import collections
 import cv2
 import dft
 import functions
 import numpy as np
-import time
 
-from PIL import Image
+from matplotlib import pyplot as plt
 
-
-def current_milli_time():
-    return time.time()
-
-
-def run(in_file, out_file, blur_strength=(7, 7)):
-    dft.run(in_file, 'results/corrected.png')
-    dft.run('results/corrected.png', 'results/corrected.png')
-
-    img = 'results/corrected.png'
-
-    image = cv2.imread(img)
+def run(in_file, blur_strength=(7, 7)):
+    """
+    Preprocessing of the barcode image
+        Input:
+            in_file: RGB Image input filepath.
+            blur_strength: Average blurring mask size. Default: (7,7)
+        Output:
+            Processed image
+    """
+    image = dft.run(in_file)
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
     # compute the Scharr gradient magnitude representation of the images
@@ -30,24 +25,30 @@ def run(in_file, out_file, blur_strength=(7, 7)):
     # subtract the y-gradient from the x-gradient
     gradient = cv2.subtract(gradX, gradY)
     gradient = cv2.convertScaleAbs(gradient)
-    # cv2.imshow("Gradient", gradient)
 
     # blur and threshold the image
     blurred = cv2.blur(gradient, blur_strength)
     (_, thresh) = cv2.threshold(blurred, 225, 255, cv2.THRESH_BINARY)
-    # cv2.imshow("Blurred", blurred)
 
     # construct a closing kernel and apply it to the thresholded image
     kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (21, 7))
     closed = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel)
-    # cv2.imshow("Closed", closed)
 
     # perform a series of erosions and dilations
     closed = cv2.erode(closed, None, iterations=4)
-    # cv2.imshow("Eroded", closed)
 
     closed = cv2.dilate(closed, None, iterations=4)
-    # cv2.imshow("Dilated", closed)
+
+    plt.subplot(2,2,1), plt.imshow(image ,cmap = 'gray')
+    plt.title('Original'), plt.xticks([]), plt.yticks([])
+    plt.subplot(2,2,2), plt.imshow(gradient ,cmap = 'gray')
+    plt.title('Gradient'), plt.xticks([]), plt.yticks([])
+    plt.subplot(2,2,3), plt.imshow(thresh ,cmap = 'gray')
+    plt.title('Threshold'), plt.xticks([]), plt.yticks([])
+    plt.subplot(2,2,4), plt.imshow(closed ,cmap = 'gray')
+    plt.title('Closed'), plt.xticks([]), plt.yticks([])
+
+    plt.show()
 
     # find the contours in the thresholded image, then sort the contours
     # by their area, keeping only the largest one
@@ -67,63 +68,26 @@ def run(in_file, out_file, blur_strength=(7, 7)):
     cv2.drawContours(mask, [box], -1, (0, 255, 0), -1)
 
     out = np.zeros_like(image)
-    out.fill(255)
     in_border = np.where(mask == 255)
 
     out[in_border[0], in_border[1], in_border[2]] = \
         image[in_border[0], in_border[1], in_border[2]]
 
     out = cv2.cvtColor(out, cv2.COLOR_BGR2GRAY)
-    (_, thresh) = cv2.threshold(
-        out, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-
-    x, y = np.nonzero(thresh)
-    thresh = thresh[x.min():x.max() + 1, y.min():y.max() + 1]
-
-    processed_img = Image.fromarray(thresh)
-    processed_img.save(out_file)
-
-    # cv2.imshow("Out", out)
-    # cv2.waitKey(0)
-
-    """(_, thresh) = cv2.threshold(
-        out, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-
-    thresh = np.uint8(thresh)
-
-    canny = np.copy(thresh)
-    cv2.Canny(thresh, 200, 100, canny, 3, True)
-
-    rhos = np.array([])
-    thetas = np.array([])
-
-    threshold = 1
-    while True:
-        lines = cv2.HoughLines(
-            canny, 1, np.pi / 45, threshold, min_theta=-(np.pi / 6),
-            max_theta=np.pi / 6)
-        if lines is None:
-            break
-
-        lines = np.ravel(lines)
-        rhos = np.append(rhos, lines[::2])
-        thetas = np.append(thetas, lines[1::2])
-
-        threshold += 1
-
-    accum = collections.Counter(list(zip(rhos, thetas)))
-
-    theta = accum.most_common(1)[0][0][1]
-
-    print(theta)
-
-    angle = -(np.rad2deg(theta))
-    # print(np.rad2deg(theta))
-
-    out = functions.rotate_about_center(out, angle)
+    (_, thresh2) = cv2.threshold(out, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
 
     x, y = np.nonzero(out)
-    out = out[x.min():x.max() + 1, y.min():y.max() + 1]
+    thresh2 = out[x.min():x.max() + 1, y.min():y.max() + 1]
 
-    processed_img = Image.fromarray(out)
-    processed_img.save(out_file)"""
+    plt.subplot(2,2,1), plt.imshow(image ,cmap = 'gray')
+    plt.title('Original'), plt.xticks([]), plt.yticks([])
+    plt.subplot(2,2,2), plt.imshow(mask ,cmap = 'gray')
+    plt.title('Mask'), plt.xticks([]), plt.yticks([])
+    plt.subplot(2,2,3), plt.imshow(out ,cmap = 'gray')
+    plt.title('Out threshold'), plt.xticks([]), plt.yticks([])
+    plt.subplot(2,2,4), plt.imshow(thresh2 ,cmap = 'gray')
+    plt.title('Out + Cropped'), plt.xticks([]), plt.yticks([])
+
+    plt.show()
+
+    return thresh2

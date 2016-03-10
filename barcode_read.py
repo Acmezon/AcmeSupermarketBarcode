@@ -5,7 +5,6 @@ import preproc
 import numpy as np
 import matplotlib.pyplot as plt
 
-
 def decode_image(path, function_threshold=55, blur_strength=(7, 7)):
     """
     Toma la imagen de un codigo de barras y lo decodifica, devolviendo
@@ -18,14 +17,10 @@ def decode_image(path, function_threshold=55, blur_strength=(7, 7)):
     expresados en relacion al grosor base
     """
 
-    preproc.run(path, 'results/barcode_processed.jpg', blur_strength)
-
-    # Se lee la imagen y se pasa a gris
-    image = cv2.imread('results/barcode_processed.jpg')
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    image = preproc.run(path, blur_strength)
 
     # Se le aplica el detector de bordes de Canny
-    canny = canny_edge(gray, 100, 200)
+    canny = canny_edge(image, 100, 200)
 
     # Se inicializa un vector de rhos y thetas que iran guardando los
     # valores encontrados para los distintos umbrales
