@@ -82,22 +82,10 @@ def decode_image(path, function_threshold=0, blur_strength=(7, 7)):
     votes_indices = np.searchsorted(rho_comp, rho_values)
     votes_comp[votes_indices] = votes
 
-    # Se normalizan las lineas para que todas las "largas" tengan el mismo
-    # valor y las bajas tambien
-    max_height = np.amax(votes_comp)
-    high_lines = votes_comp > (max_height - 10)
-    votes_comp[high_lines] = max_height
-
-    min_height = np.amin(votes_comp[np.nonzero(votes_comp)])
-    low_lines = np.where(votes_comp < (min_height + 15))
-    votes_comp[np.intersect1d(low_lines, np.nonzero(votes_comp))] = min_height
-    
-    # Se buscan las zonas de control que se corresponden con las lineas mas
-    # altas y se descartan las que codifican numeros
-    high_lines = np.where(votes_comp == max_height)
-    control_first = high_lines[0][0:4]
-    control_end = high_lines[0][-4:]
-    control_middle = high_lines[0][8:12]
+    non_zero = np.nonzero(votes_comp)[0]
+    control_first = non_zero[0:4]
+    control_end = non_zero[-4:]
+    control_middle = non_zero[28:32]
 
     # Se obtiene el ancho base de una linea como la media del ancho de cada una
     # de las lineas de control, redondeando hacia arriba

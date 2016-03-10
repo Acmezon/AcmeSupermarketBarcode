@@ -1,12 +1,13 @@
 # -*-coding:utf-8-*-
 import barcode_read
+import numpy as np
 import translate
 
 
 def main():
     lines = barcode_read.decode_image(
-        'resources/barcode_gir_2.png', blur_strength=(3, 3))
-    print(lines)
+        'resources/barcode_gir_4.jpg', blur_strength=(3, 3))
+
     number = translate.translate(lines)
     print(number)
 

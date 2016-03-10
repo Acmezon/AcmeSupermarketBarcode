@@ -1,15 +1,15 @@
 import numpy as np
 
+
 def translate_to_binary(lines_spaces_vector):
     """
     Translate lines-spaces vector to a binary code
     """
     r = []
     is_line = True
-    #print(lines_spaces_vector)
+    # print(lines_spaces_vector)
 
-    if len(np.where(np.logical_or(lines_spaces_vector < 1,
-                                  lines_spaces_vector > 4))[0]):
+    if np.any(lines_spaces_vector > 7) or np.any(lines_spaces_vector < 0):
         print('Error: Incorrect image bars/spaces transcription')
     else:
         for n in lines_spaces_vector:
@@ -17,6 +17,7 @@ def translate_to_binary(lines_spaces_vector):
             is_line = not is_line
 
     return r
+
 
 def translate_byte(binary_code, side):
     """
@@ -61,6 +62,7 @@ def translate_byte(binary_code, side):
     else:
         raise ValueError("Side param incorrect.")
 
+
 def checksum(barcode):
     """
     Computes a 1D barcode checksum
@@ -69,7 +71,7 @@ def checksum(barcode):
     """
     # 1. Add the values of the digits in positions 1, 3, 5, 7, 9, and 11.
     term1 = int(barcode[0]) + int(barcode[2]) + int(barcode[4]) + \
-            int(barcode[6]) + int(barcode[8]) + int(barcode[10])
+        int(barcode[6]) + int(barcode[8]) + int(barcode[10])
     # 2. Multiply this result by 3.
     term2 = 3 * term1
     # 3. Add the values of the digits in positions 2, 4, 6, 8, and 10.
@@ -81,6 +83,7 @@ def checksum(barcode):
     # result in step 4, produces a multiple of 10.
     term5 = ((10 - term4) % 10) % 10
     return str(term5) == barcode[-1]
+
 
 def translate(vector):
     """
@@ -113,6 +116,9 @@ def translate(vector):
         for group in range(0, 6):
             left = left_part[group * 7: (group + 1) * 7]
             right = right_part[group * 7: (group + 1) * 7]
+
+            print(left)
+            print(right)
 
             # First bit of each part always 0/1.
             # Left odd parity. Right even parity.
