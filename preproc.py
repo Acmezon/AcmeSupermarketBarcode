@@ -16,11 +16,6 @@ def run(in_file, blur_strength=(7, 7), inclination_n=4):
     """
     image = dft.run(in_file, 4)
 
-    plt.subplot(111), plt.imshow(image ,cmap = 'gray')
-    plt.title('image'), plt.xticks([]), plt.yticks([])
-
-    plt.show()
-
     # compute the Scharr gradient magnitude representation of the images
     # in both the x and y direction
     gradX = cv2.Sobel(image, ddepth=cv2.CV_32F, dx=1, dy=0, ksize=-1)
@@ -33,15 +28,10 @@ def run(in_file, blur_strength=(7, 7), inclination_n=4):
     # blur and threshold the image
     blurred = cv2.blur(gradient, blur_strength)
 
-    plt.subplot(111), plt.imshow(blurred ,cmap = 'gray')
-    plt.title('blurred'), plt.xticks([]), plt.yticks([])
-
-    plt.show()
-
     (_, thresh) = cv2.threshold(blurred, 225, 255, cv2.THRESH_BINARY)
 
     # closing operation. kernel 15x15
-    kernel = np.ones((15,15),np.uint8)
+    kernel = np.ones((20,20),np.uint8)
     closed = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel)
 
     plt.subplot(2,2,1), plt.imshow(image ,cmap = 'gray')
@@ -57,11 +47,9 @@ def run(in_file, blur_strength=(7, 7), inclination_n=4):
 
     # find the contours in the thresholded image, then sort the contours
     # by their area, keeping only the largest one
-    _, cnts, _ = cv2.findContours(closed.copy(), cv2.RETR_EXTERNAL,
-                                  cv2.CHAIN_APPROX_SIMPLE)
-
+    _, cnts, _ = cv2.findContours(closed.copy(),cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
     c = sorted(cnts, key=cv2.contourArea, reverse=True)[0]
-
+ 
     # compute the rotated bounding box of the largest contour
     rect = cv2.minAreaRect(c)
     box = np.int0(cv2.boxPoints(rect))
@@ -70,22 +58,20 @@ def run(in_file, blur_strength=(7, 7), inclination_n=4):
 
     # draw a bounding box arounded the detected barcode and display the
     # image
-    cv2.drawContours(mask, [box], -1, (0, 255, 0), -1)
+    cv2.drawContours(mask, [box], -1, (255, 255, 255), -1)
 
     out = np.zeros_like(image)
     in_border = np.where(mask == 255)
 
-    out[in_border[0], in_border[1], in_border[2]] = \
-        image[in_border[0], in_border[1], in_border[2]]
+    out[in_border[0], in_border[1]] = image[in_border[0], in_border[1]]
 
-    out = cv2.cvtColor(out, cv2.COLOR_BGR2GRAY)
     (_, thresh2) = cv2.threshold(out, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
 
     x, y = np.nonzero(out)
     thresh2 = out[x.min():x.max() + 1, y.min():y.max() + 1]
 
-    plt.subplot(2,2,1), plt.imshow(image ,cmap = 'gray')
-    plt.title('Original'), plt.xticks([]), plt.yticks([])
+    plt.subplot(2,2,1), plt.imshow(closed ,cmap = 'gray')
+    plt.title('closed'), plt.xticks([]), plt.yticks([])
     plt.subplot(2,2,2), plt.imshow(mask ,cmap = 'gray')
     plt.title('Mask'), plt.xticks([]), plt.yticks([])
     plt.subplot(2,2,3), plt.imshow(out ,cmap = 'gray')
