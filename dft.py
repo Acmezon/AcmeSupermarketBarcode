@@ -16,6 +16,7 @@ def run(in_file, n=2):
     image = cv2.imread(in_file, 0)
 
     result = np.copy(image)
+    angle = -1
     for i in range(0, n):
 
         dft = cv2.dft(np.float32(result), flags=cv2.DFT_COMPLEX_OUTPUT)
@@ -30,6 +31,9 @@ def run(in_file, n=2):
         thresh = np.uint8(thresh)
 
         lines = cv2.HoughLines(thresh, 1, np.pi / 180, 30)
+
+        if lines is None or angle==0:
+            break;
 
         for rho, theta in lines[0]:
             a = np.cos(theta)

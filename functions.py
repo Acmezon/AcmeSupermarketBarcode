@@ -26,9 +26,12 @@ def rotate_about_center(img, angle, scale=1.):
 
 	rotated = cv2.warpAffine(img, rot_mat, (int(math.ceil(nw)), int(math.ceil(nh))))
 
-	if nh-h!=0:
+	cut_h = nh-h
+	cut_w = nw-w
+
+	if cut_h!=0 and cut_w!=0:
 		#If crop necessary
-		cropped = rotated[nh-h:h-nh, nw-w:w-nw]
+		cropped = rotated[cut_h:-cut_h, cut_w:-cut_w]
 	else:
 		cropped = rotated
 
