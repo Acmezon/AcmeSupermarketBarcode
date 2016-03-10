@@ -5,7 +5,7 @@ import numpy as np
 
 from matplotlib import pyplot as plt
 
-def run(in_file, blur_strength=(7, 7)):
+def run(in_file, blur_strength=(7, 7), inclination_n=4):
     """
     Preprocessing of the barcode image
         Input:
@@ -14,7 +14,7 @@ def run(in_file, blur_strength=(7, 7)):
         Output:
             Processed image
     """
-    image = dft.run(in_file)
+    image = dft.run(in_file, 5)
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
     # compute the Scharr gradient magnitude representation of the images
@@ -30,14 +30,9 @@ def run(in_file, blur_strength=(7, 7)):
     blurred = cv2.blur(gradient, blur_strength)
     (_, thresh) = cv2.threshold(blurred, 225, 255, cv2.THRESH_BINARY)
 
-    # construct a closing kernel and apply it to the thresholded image
-    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (21, 7))
+    # closing operation. kernel 15x15
+    kernel = np.ones((15,15),np.uint8)
     closed = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel)
-
-    # perform a series of erosions and dilations
-    closed = cv2.erode(closed, None, iterations=4)
-
-    closed = cv2.dilate(closed, None, iterations=4)
 
     plt.subplot(2,2,1), plt.imshow(image ,cmap = 'gray')
     plt.title('Original'), plt.xticks([]), plt.yticks([])

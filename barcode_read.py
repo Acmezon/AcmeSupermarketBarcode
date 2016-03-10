@@ -19,7 +19,7 @@ def decode_image(path, function_threshold=55, blur_strength=(7, 7)):
 
     image = preproc.run(path, blur_strength)
 
-    # Se le aplica el detector de bordes de Canny
+    '''# Se le aplica el detector de bordes de Canny
     canny = canny_edge(image, 100, 200)
 
     # Se inicializa un vector de rhos y thetas que iran guardando los
@@ -123,7 +123,7 @@ def decode_image(path, function_threshold=55, blur_strength=(7, 7)):
     # decodificacion falla
 
     # Se devuelve el resultado
-    return lines_width
+    return lines_width'''
 
 
 def canny_edge(img, t_1, t_2, aperture=3, l2gradient=True):
