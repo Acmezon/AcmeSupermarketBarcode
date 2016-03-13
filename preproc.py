@@ -34,7 +34,7 @@ def run(in_file, blur_strength=(7, 7), inclination_n=4):
     kernel = np.ones((20, 20), np.uint8)
     closed = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel)
 
-    
+    """
     plt.subplot(4,2,1), plt.imshow(image ,cmap = 'gray')
     plt.title('Original'), plt.xticks([]), plt.yticks([])
     plt.subplot(4,2,2), plt.imshow(gradient ,cmap = 'gray')
@@ -43,7 +43,7 @@ def run(in_file, blur_strength=(7, 7), inclination_n=4):
     plt.title('Threshold'), plt.xticks([]), plt.yticks([])
     plt.subplot(4,2,4), plt.imshow(closed ,cmap = 'gray')
     plt.title('Closed'), plt.xticks([]), plt.yticks([])
-    
+    """
 
     # find the contours in the thresholded image, then sort the contours
     # by their area, keeping only the largest one
@@ -86,7 +86,7 @@ def run(in_file, blur_strength=(7, 7), inclination_n=4):
     x, y = np.nonzero(out)
     thresh2 = out[x.min():x.max() + 1, y.min():y.max() + 1]
 
-    
+    """
     plt.subplot(4, 2, 5), plt.imshow(closed, cmap='gray')
     plt.title('closed'), plt.xticks([]), plt.yticks([])
     plt.subplot(4, 2, 6), plt.imshow(mask, cmap='gray')
@@ -97,6 +97,6 @@ def run(in_file, blur_strength=(7, 7), inclination_n=4):
     plt.title('Out + Cropped'), plt.xticks([]), plt.yticks([])
 
     plt.show()
-    
+    """
 
     return thresh2

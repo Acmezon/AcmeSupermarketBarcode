@@ -2,9 +2,10 @@
 import collections
 import cv2
 import preproc
-import math
 import numpy as np
 import matplotlib.pyplot as plt
+
+from decimal import Decimal, ROUND_HALF_UP
 
 
 def decode_image(path, function_threshold=0, blur_strength=(7, 7)):
@@ -96,15 +97,14 @@ def decode_image(path, function_threshold=0, blur_strength=(7, 7)):
 
     # Se obtiene el grosor de cada linea, relativo al grosor base, dividiendo
     # el ancho original por el base y redondeando hacia arriba
-    myround = np.vectorize(lambda x: round(x))
+    myround = np.vectorize(
+        lambda x: Decimal(Decimal(x).
+                          quantize(Decimal('1'), rounding=ROUND_HALF_UP)))
 
-    lines_width = myround((np.diff(np.nonzero(votes_comp)) / base_width) + 0.1)
+    lines_width = myround((np.diff(np.nonzero(votes_comp)) / base_width))
 
     print(lines_width)
     print((np.diff(np.nonzero(votes_comp)) / base_width) + 0.1)
-
-    cv2.imshow("canny", canny)
-    cv2.waitKey(0)
 
     # TODO:
     # apuntar si alguna se queda en .5 para variarla hacia abajo si la
@@ -134,11 +134,12 @@ def canny_edge(img, t_1, t_2, aperture=3, l2gradient=True):
     kernel = np.ones((1, 2), np.uint8)
     opened = cv2.dilate(opened, kernel)
 
-    resized = cv2.resize(opened, (0, 0), fx=1.5, fy=1)
-
-    cv2.imshow("resized", resized)
+    resized = cv2.resize(opened, (0, 0), fx=1.10, fy=1)
 
     canny = np.copy(resized)
     cv2.Canny(resized, t_1, t_2, canny, aperture, l2gradient)
+
+    cv2.imshow('canny', canny)
+    cv2.waitKey(0)
 
     return canny
