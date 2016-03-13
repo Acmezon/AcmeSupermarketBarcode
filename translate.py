@@ -101,6 +101,8 @@ def translate(vector):
     frontier_array = np.array([1., 0., 1.])
     middle_array = np.array([0., 1., 0., 1., 0.])
 
+    print(len(vector))
+
     if len(vector) == 95 and \
             np.array_equal(vector[0:3], frontier_array) and \
             np.array_equal(vector[-3:], frontier_array) and \

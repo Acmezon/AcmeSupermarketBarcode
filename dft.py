@@ -3,9 +3,11 @@ import functions
 import math
 import numpy as np
 
+
 def run(in_file, n=2):
     """
-    Computes a inclination correction process with DFT transformation and Hough lines.
+    Computes a inclination correction process with DFT
+    transformation and Hough lines.
         Input:
             in_file: RGB Image input path.
             n: Process iterations. Default: 2.
@@ -32,8 +34,8 @@ def run(in_file, n=2):
 
         lines = cv2.HoughLines(thresh, 1, np.pi / 180, 30)
 
-        if lines is None or angle==0:
-            break;
+        if lines is None or angle == 0:
+            break
 
         for rho, theta in lines[0]:
             a = np.cos(theta)

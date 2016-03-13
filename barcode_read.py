@@ -96,7 +96,15 @@ def decode_image(path, function_threshold=0, blur_strength=(7, 7)):
 
     # Se obtiene el grosor de cada linea, relativo al grosor base, dividiendo
     # el ancho original por el base y redondeando hacia arriba
-    lines_width = np.around(np.diff(np.nonzero(votes_comp)) / base_width)
+    myround = np.vectorize(lambda x: round(x))
+
+    lines_width = myround((np.diff(np.nonzero(votes_comp)) / base_width) + 0.1)
+
+    print(lines_width)
+    print((np.diff(np.nonzero(votes_comp)) / base_width) + 0.1)
+
+    cv2.imshow("canny", canny)
+    cv2.waitKey(0)
 
     # TODO:
     # apuntar si alguna se queda en .5 para variarla hacia abajo si la
@@ -111,8 +119,6 @@ def canny_edge(img, t_1, t_2, aperture=3, l2gradient=True):
     Aplica el detector de bordes Canny a la imagen de entrada.
     Primero la binariza y luego aplica el detector
     """
-
-    cv2.imshow('img', img)
     (_, thresh) = cv2.threshold(
         img, 230, 255, cv2.THRESH_BINARY)
 
@@ -128,7 +134,11 @@ def canny_edge(img, t_1, t_2, aperture=3, l2gradient=True):
     kernel = np.ones((1, 2), np.uint8)
     opened = cv2.dilate(opened, kernel)
 
-    canny = np.copy(opened)
-    cv2.Canny(opened, t_1, t_2, canny, aperture, l2gradient)
+    resized = cv2.resize(opened, (0, 0), fx=1.5, fy=1)
+
+    cv2.imshow("resized", resized)
+
+    canny = np.copy(resized)
+    cv2.Canny(resized, t_1, t_2, canny, aperture, l2gradient)
 
     return canny
