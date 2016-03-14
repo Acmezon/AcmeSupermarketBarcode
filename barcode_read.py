@@ -3,6 +3,7 @@ import collections
 import cv2
 import preproc
 import numpy as np
+import math
 import matplotlib.pyplot as plt
 
 from decimal import Decimal, ROUND_HALF_UP
@@ -22,8 +23,14 @@ def decode_image(path, function_threshold=0, blur_strength=(7, 7)):
 
     image = preproc.run(path, blur_strength)
 
+    cv2.imshow("image", image)
+
     # Se le aplica el detector de bordes de Canny
-    canny = canny_edge(image, 200, 100)
+    canny_or = canny_edge(image, 200, 100)
+    canny = cv2.bitwise_not(canny_or)
+    cv2.imshow("canny_pre", canny)
+    
+    cv2.waitKey(0)
 
     # Se inicializa un vector de rhos y thetas que iran guardando los
     # valores encontrados para los distintos umbrales
@@ -72,6 +79,21 @@ def decode_image(path, function_threshold=0, blur_strength=(7, 7)):
     votes = votes[high_votes]
     rho_values = rho_values[high_votes]
 
+    print(most_common_theta)
+    for rho in rho_values:
+        a = np.cos(most_common_theta)
+        b = np.sin(most_common_theta)
+        x0 = a * rho
+        y0 = b * rho
+        x1 = int(x0 + 1000 * (-b))
+        y1 = int(y0 + 1000 * (a))
+        x2 = int(x0 - 1000 * (-b))
+        y2 = int(y0 - 1000 * (a))
+
+        cv2.line(canny_or, (x1, y1), (x2, y2), (0, 0, 255), 2)
+
+    cv2.imshow("canny_or", canny_or)
+
     # Se extiende el array de distancias para que los valores cubran
     # todos los enteros de principio a fin
     rho_comp = np.arange(rho_values[0], rho_values[-1] + 1)
@@ -103,9 +125,6 @@ def decode_image(path, function_threshold=0, blur_strength=(7, 7)):
 
     lines_width = myround((np.diff(np.nonzero(votes_comp)) / base_width))
 
-    print(lines_width)
-    print((np.diff(np.nonzero(votes_comp)) / base_width) + 0.1)
-
     # TODO:
     # apuntar si alguna se queda en .5 para variarla hacia abajo si la
     # decodificacion falla
@@ -124,22 +143,25 @@ def canny_edge(img, t_1, t_2, aperture=3, l2gradient=True):
 
     thresh = np.uint8(thresh)
 
-    percentage = 100
+    cv2.imshow("thresh", thresh)
+
+    percentage = 80
     kernel_height = np.around(thresh.shape[0] * (percentage / 100))
 
     kernel = np.ones((kernel_height, 1), np.uint8)
-    opened = cv2.dilate(thresh, kernel)
-    opened = cv2.erode(opened, kernel)
+    dilated = cv2.dilate(thresh, kernel)
+    cv2.imshow("dilated", dilated)
+    opened = cv2.erode(dilated, kernel)
+    cv2.imshow("opened", opened)
 
-    kernel = np.ones((1, 2), np.uint8)
-    opened = cv2.dilate(opened, kernel)
+    """kernel = np.ones((1, 2), np.uint8)
+    dilated_sm = cv2.dilate(opened, kernel)
+    cv2.imshow("dilated_sm", dilated_sm)
+    """
 
-    resized = cv2.resize(opened, (0, 0), fx=1.10, fy=1)
+    resized = cv2.resize(opened, (0, 0), fx=2, fy=1)
 
     canny = np.copy(resized)
     cv2.Canny(resized, t_1, t_2, canny, aperture, l2gradient)
 
-    cv2.imshow('canny', canny)
-    cv2.waitKey(0)
-
-    return canny
+    return resized

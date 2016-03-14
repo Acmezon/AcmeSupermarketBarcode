@@ -15,7 +15,6 @@ def translate_to_binary(lines_spaces_vector):
         for n in lines_spaces_vector:
             r = np.append(r, np.repeat(int(is_line), n))
             is_line = not is_line
-    print(r)
     return r
 
 
@@ -118,9 +117,6 @@ def translate(vector):
         for group in range(0, 6):
             left = left_part[group * 7: (group + 1) * 7]
             right = right_part[group * 7: (group + 1) * 7]
-
-            print(left)
-            print(right)
 
             # First bit of each part always 0/1.
             # Left odd parity. Right even parity.
