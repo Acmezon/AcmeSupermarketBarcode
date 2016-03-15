@@ -3,6 +3,8 @@ import functions
 import math
 import numpy as np
 
+from PIL import Image
+
 
 def run(in_file, n=2):
     """
@@ -15,7 +17,8 @@ def run(in_file, n=2):
             Corrected image.
     """
 
-    image = cv2.imread(in_file, 0)
+    image = cv2.imread(in_file)
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
     result = np.copy(image)
     angle = -1

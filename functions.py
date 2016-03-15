@@ -29,15 +29,15 @@ def rotate_about_center(img, angle, scale=1.):
     rotated = cv2.warpAffine(
         img, rot_mat, (int(math.ceil(nw)), int(math.ceil(nh))))
 
-    cut_h = int(math.ceil((nh - h)/2))
-    cut_w = int(math.ceil((nw - w)/2))
+    cut_h = int(math.ceil((nh - h) / 2))
+    cut_w = int(math.ceil((nw - w) / 2))
 
     if cut_h != 0 and cut_w != 0:
         # If crop necessary
         cropped = rotated[cut_h:-cut_h, cut_w:-cut_w]
     else:
         cropped = rotated
-    return 255 - cropped
+    return 255 - rotated
 
 
 def get_roi(image, blur_strength=(7, 7)):
@@ -50,6 +50,7 @@ def get_roi(image, blur_strength=(7, 7)):
     gradient = cv2.subtract(gradX, gradY)
     gradient = cv2.convertScaleAbs(gradient)
 
+    print(blur_strength)
     # blur and threshold the image
     blurred = cv2.blur(gradient, blur_strength)
 
@@ -115,9 +116,10 @@ def get_roi(image, blur_strength=(7, 7)):
     x, y = np.nonzero(out)
     out_c = out_c[x.min():x.max() + 1, y.min():y.max() + 1]
 
-    # _,out_c = cv2.threshold(out_c,127,255,cv2.THRESH_BINARY)
+    # _, out_c = cv2.threshold(out_c, 127, 255, cv2.THRESH_BINARY)
 
     # cv2.imshow("out_c", out_c)
+
     """
     plt.subplot(4, 2, 5), plt.imshow(closed, cmap='gray')
     plt.title('closed'), plt.xticks([]), plt.yticks([])

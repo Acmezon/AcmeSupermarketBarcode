@@ -3,7 +3,7 @@ import dft
 import functions
 
 
-def run(in_file, blur_strength=(7, 7), inclination_n=4):
+def run(in_file, blur_strength=(7, 7), inclination_n=5):
     """
     Preprocessing of the barcode image
         Input:
@@ -12,7 +12,7 @@ def run(in_file, blur_strength=(7, 7), inclination_n=4):
         Output:
             Processed image
     """
-    image = dft.run(in_file, 5)
+    image = dft.run(in_file, inclination_n)
 
     barcode = functions.get_barcode(image, blur_strength)
     cv2.imshow("barcode", barcode)

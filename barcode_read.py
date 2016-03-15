@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 from decimal import Decimal, ROUND_HALF_UP
 
 
-def get_lines_width(lines, start, end):
+def get_lines_width(lines, start, end, iteration):
     lines = lines[start:end]
 
     control_first = lines[0:3]
@@ -22,17 +22,18 @@ def get_lines_width(lines, start, end):
 
     # Se obtiene el ancho base de una linea como la media del ancho de cada una
     # de las lineas de control, redondeando hacia arriba
-    base_width = myround(
-        np.mean(np.hstack((control_first, control_middle, control_end))))
+    base_width = int(myround(
+        np.mean(np.hstack((control_first, control_middle, control_end)))))
 
     # Se obtiene el grosor de cada linea, relativo al grosor base, dividiendo
     # el ancho original por el base y redondeando hacia arriba
-    lines_width = myround(lines / base_width)
+    lines_width = myround(np.array(lines) / (base_width - 0.1 * iteration))
 
     return lines_width
 
 
-def decode_image(path, function_threshold=0, blur_strength=(7, 7)):
+def decode_image(path, blur_strength=(7, 7),
+                 inclination_n=0):
     """
     Toma la imagen de un codigo de barras y lo decodifica, devolviendo
     un vector como el siguiente:
@@ -44,9 +45,10 @@ def decode_image(path, function_threshold=0, blur_strength=(7, 7)):
     expresados en relacion al grosor base
     """
 
-    image = preproc.run(path, blur_strength)
+    image = preproc.run(path, blur_strength, inclination_n)
 
     image = cv2.bitwise_not(image)
+    cv2.imshow("image", image)
 
     sample = image[image.shape[0] / 2, :]
 
@@ -71,23 +73,55 @@ def decode_image(path, function_threshold=0, blur_strength=(7, 7)):
 
     combinations = [[0, 0], [0, 1], [1, 0], [1, 1]]
 
-    lines_width = None
+    max_sum = 0
+    combination_res = None
+    lines_res = None
     for combination in combinations:
         start, end = np.where(diff_2 == combination[0])[0][0], np.where(
             diff_2 == combination[1])[0][-1]
-        lines_width = get_lines_width(lines, start, end + 1 + 2)
+        lines_width = get_lines_width(lines, start, end + 1 + 2, 0)
         # +1 porque no se incluye el final, +2 porque cada diff reduce el array
         # en original en 1 posicion
 
-        print(np.sum(lines_width))
-        if np.sum(lines_width) == 95:
+        lines_sum = np.sum(lines_width)
+        print(lines_sum)
+        if lines_sum == 95:
+            lines_res = lines_width
             break
+        elif lines_sum > max_sum:
+            max_sum = lines_sum
+            combination_res = combination
+            lines_res = lines_width
 
-        lines_width = None
+    if 90 < max_sum and max_sum < 95:
+        i = 0
+        while True:
+            start = np.where(diff_2 == combination_res[0])[0][0]
+            end = np.where(diff_2 == combination_res[1])[0][-1]
+            lines_width = get_lines_width(lines, start, end + 1 + 2, i)
+            i += 1
+
+            if np.sum(lines_width) >= 95:
+                lines_res = lines_width
+                break
+    elif 95 < max_sum and max_sum < 99:
+        i = 0
+        while True:
+            start = np.where(diff_2 == combination_res[0])[0][0]
+            end = np.where(diff_2 == combination_res[1])[0][-1]
+            lines_width = get_lines_width(lines, start, end + 1 + 2, -i)
+            i += 1
+
+            if np.sum(lines_width) >= 95:
+                lines_res = lines_width
+                break
+
+    if np.sum(lines_res) != 95:
+        lines_res = None
 
     # cv2.waitKey(0)
 
-    return lines_width
+    return lines_res
 
     """
     # Se le aplica el detector de bordes de Canny
