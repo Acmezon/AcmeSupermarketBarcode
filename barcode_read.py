@@ -47,7 +47,6 @@ def decode_image(path, function_threshold=0, blur_strength=(7, 7)):
     image = preproc.run(path, blur_strength)
 
     image = cv2.bitwise_not(image)
-    cv2.imshow("image", image)
 
     sample = image[image.shape[0] / 2, :]
 
@@ -68,9 +67,7 @@ def decode_image(path, function_threshold=0, blur_strength=(7, 7)):
     pos = np.concatenate(([0], pos + 1, [len(sample)]))
     lines = [b - a for (a, b) in zip(pos[:-1], pos[1:])]
 
-    print(lines)
     diff_2 = np.diff(np.abs(np.diff(lines)))
-    print(diff_2)
 
     combinations = [[0, 0], [0, 1], [1, 0], [1, 1]]
 

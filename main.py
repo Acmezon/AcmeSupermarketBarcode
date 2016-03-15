@@ -6,7 +6,7 @@ import translate
 
 def main():
     lines = barcode_read.decode_image(
-        'resources/test_3.jpg', blur_strength=(5, 5))
+        'resources/test_2.jpg', blur_strength=(3, 3))
 
     number = translate.translate(lines)
     print(number)
