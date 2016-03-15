@@ -27,6 +27,10 @@ def decode_image(path, function_threshold=0, blur_strength=(7, 7)):
     cv2.imshow("image", image)
 
     sample = image[image.shape[0] / 2, :]
+
+    sample_mean = np.mean(sample)
+    sample[np.where(sample >= sample_mean)] = 1
+    sample[np.where(sample < sample_mean)] = 0
     plt.subplot(1, 1, 1), plt.plot(np.arange(image.shape[1]), sample)
     plt.show()
 
