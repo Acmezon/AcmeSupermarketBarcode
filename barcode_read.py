@@ -31,12 +31,47 @@ def decode_image(path, function_threshold=0, blur_strength=(7, 7)):
     sample_mean = np.mean(sample)
     sample[np.where(sample < sample_mean)] = 0
     sample[np.where(sample >= sample_mean)] = 1
+
+    non_zero = np.nonzero(sample)
+    first_non_zero, last_non_zero = non_zero[0][0], non_zero[0][-1] + 1
+
+    if last_non_zero < sample.shape[0]:
+        sample = np.delete(sample, np.s_[last_non_zero:])
+
+    if first_non_zero > 0:
+        sample = np.delete(sample, np.s_[0:first_non_zero])
+
+    pos, = np.where(np.diff(sample) != 0)
+    pos = np.concatenate(([0], pos + 1, [len(sample)]))
+    lines = [b - a for (a, b) in zip(pos[:-1], pos[1:])]
+
+    control_first = lines[0:3]
+    control_end = lines[-3:]
+    control_middle = lines[27:31]
+
+    myround = np.vectorize(
+        lambda x: Decimal(Decimal(x).
+                          quantize(Decimal('1'), rounding=ROUND_HALF_UP)))
+
+    # Se obtiene el ancho base de una linea como la media del ancho de cada una
+    # de las lineas de control, redondeando hacia arriba
+    base_width = myround(
+        np.mean(np.hstack((control_first, control_middle, control_end))))
+
+    # Se obtiene el grosor de cada linea, relativo al grosor base, dividiendo
+    # el ancho original por el base y redondeando hacia arriba
+    lines_width = myround(lines / base_width)
+
+    """
     ax = plt.subplot(1, 1, 1)
     ax.set_ylim([0, 1.2])
-    plt.plot(np.arange(image.shape[1]), sample)
+    plt.plot(np.arange(sample.shape[0]), sample)
     plt.show()
 
     cv2.waitKey(0)
+    """
+
+    return lines_width
 
     """
     # Se le aplica el detector de bordes de Canny
