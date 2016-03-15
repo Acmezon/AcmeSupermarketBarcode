@@ -6,7 +6,7 @@ from matplotlib import pyplot as plt
 
 
 def rotate_about_center(img, angle, scale=1.):
-    """
+    img = cv2.bitwise_not(img)
     w = img.shape[1]
     h = img.shape[0]
     rangle = np.deg2rad(angle)  # angle in radians
@@ -29,48 +29,7 @@ def rotate_about_center(img, angle, scale=1.):
     rotated = cv2.warpAffine(
         img, rot_mat, (int(math.ceil(nw)), int(math.ceil(nh))))
 
-    cut_h = nh - h
-    cut_w = nw - w
-
-    if cut_h != 0 and cut_w != 0:
-        # If crop necessary
-        cropped = rotated[cut_h:-cut_h, cut_w:-cut_w]
-    else:
-        cropped = rotated
-
-    return cropped
-    """
-    rows, cols = img.shape
-
-    M = cv2.getRotationMatrix2D((cols / 2, rows / 2), angle, 1)
-
-    if cols > rows:
-        out_dims = (cols, cols)
-    else:
-        out_dims = (rows, rows)
-
-    rotated_img = cv2.warpAffine(img, M, out_dims)
-
-    return rotated_img
-
-
-def box_angle(box):
-    x = box[:, 0]
-    x_diff = np.argmax(np.diff(x))
-    p1, p2 = box[1], box[2]
-
-    m_numerator = p1[1] - p2[1]
-    m_denominator = p2[0] - p1[0]
-
-    angle = np.rad2deg(math.atan2(m_numerator, m_denominator))
-
-    print(box)
-    print(m_numerator)
-    print(m_denominator)
-    print(math.atan2(m_numerator, m_denominator))
-    print(angle)
-
-    return angle
+    return 255 - rotated
 
 
 def get_roi(image, blur_strength=(7, 7)):
@@ -92,6 +51,7 @@ def get_roi(image, blur_strength=(7, 7)):
     kernel = np.ones((20, 20), np.uint8)
     closed = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel)
 
+    """
     plt.subplot(4, 2, 1), plt.imshow(image, cmap='gray')
     plt.title('Original'), plt.xticks([]), plt.yticks([])
     plt.subplot(4, 2, 2), plt.imshow(gradient, cmap='gray')
@@ -100,6 +60,7 @@ def get_roi(image, blur_strength=(7, 7)):
     plt.title('Threshold'), plt.xticks([]), plt.yticks([])
     plt.subplot(4, 2, 4), plt.imshow(closed, cmap='gray')
     plt.title('Closed'), plt.xticks([]), plt.yticks([])
+    """
 
     # find the contours in the thresholded image, then sort the contours
     # by their area, keeping only the largest one
@@ -139,16 +100,16 @@ def get_roi(image, blur_strength=(7, 7)):
     in_border = np.where(mask == 255)
 
     out[in_border[0], in_border[1]] = image[in_border[0], in_border[1]]
-    cv2.imshow("out", out)
+    # cv2.imshow("out", out)
 
     out_c = out + mask_neg
 
     x, y = np.nonzero(out)
     out_c = out_c[x.min():x.max() + 1, y.min():y.max() + 1]
 
-    cv2.imshow("out_c", out_c)
-
-    plt.subplot(4, 2, 5), plt.imshow(closed, cmap='gray')
+    # cv2.imshow("out_c", out_c)
+    """
+    plt.subplot(4, 2, 5), plt.imshow(opened, cmap='gray')
     plt.title('closed'), plt.xticks([]), plt.yticks([])
     plt.subplot(4, 2, 6), plt.imshow(mask, cmap='gray')
     plt.title('Mask'), plt.xticks([]), plt.yticks([])
@@ -158,10 +119,12 @@ def get_roi(image, blur_strength=(7, 7)):
     plt.title('Out + Cropped'), plt.xticks([]), plt.yticks([])
 
     plt.show()
+    """
 
     return box, out_c
 
 
 def get_barcode(image, blur_strength=(7, 7)):
-    box, out_c = get_roi(image, blur_strength)
+    _, out_c = get_roi(image, blur_strength)
 
+    return out_c

@@ -1,10 +1,6 @@
 import cv2
 import dft
 import functions
-import math
-import numpy as np
-
-from matplotlib import pyplot as plt
 
 
 def run(in_file, blur_strength=(7, 7), inclination_n=4):
@@ -16,8 +12,9 @@ def run(in_file, blur_strength=(7, 7), inclination_n=4):
         Output:
             Processed image
     """
-    image = dft.run(in_file, 1)
+    image = dft.run(in_file, 5)
 
     barcode = functions.get_barcode(image, blur_strength)
+    cv2.imshow("barcode", barcode)
 
-    return thresh
+    return barcode
