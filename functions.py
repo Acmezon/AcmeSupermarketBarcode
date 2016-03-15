@@ -29,7 +29,15 @@ def rotate_about_center(img, angle, scale=1.):
     rotated = cv2.warpAffine(
         img, rot_mat, (int(math.ceil(nw)), int(math.ceil(nh))))
 
-    return 255 - rotated
+    cut_h = int(math.ceil((nh - h)/2))
+    cut_w = int(math.ceil((nw - w)/2))
+
+    if cut_h != 0 and cut_w != 0:
+        # If crop necessary
+        cropped = rotated[cut_h:-cut_h, cut_w:-cut_w]
+    else:
+        cropped = rotated
+    return 255 - cropped
 
 
 def get_roi(image, blur_strength=(7, 7)):
@@ -51,7 +59,6 @@ def get_roi(image, blur_strength=(7, 7)):
     kernel = np.ones((20, 20), np.uint8)
     closed = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel)
 
-    """
     plt.subplot(4, 2, 1), plt.imshow(image, cmap='gray')
     plt.title('Original'), plt.xticks([]), plt.yticks([])
     plt.subplot(4, 2, 2), plt.imshow(gradient, cmap='gray')
@@ -60,7 +67,6 @@ def get_roi(image, blur_strength=(7, 7)):
     plt.title('Threshold'), plt.xticks([]), plt.yticks([])
     plt.subplot(4, 2, 4), plt.imshow(closed, cmap='gray')
     plt.title('Closed'), plt.xticks([]), plt.yticks([])
-    """
 
     # find the contours in the thresholded image, then sort the contours
     # by their area, keeping only the largest one
@@ -107,10 +113,9 @@ def get_roi(image, blur_strength=(7, 7)):
     x, y = np.nonzero(out)
     out_c = out_c[x.min():x.max() + 1, y.min():y.max() + 1]
 
+    _,out_c = cv2.threshold(out_c,127,255,cv2.THRESH_BINARY)
+
     # cv2.imshow("out_c", out_c)
-    """
-    plt.subplot(4, 2, 5), plt.imshow(opened, cmap='gray')
-    plt.title('closed'), plt.xticks([]), plt.yticks([])
     plt.subplot(4, 2, 6), plt.imshow(mask, cmap='gray')
     plt.title('Mask'), plt.xticks([]), plt.yticks([])
     plt.subplot(4, 2, 7), plt.imshow(out, cmap='gray')
@@ -119,8 +124,6 @@ def get_roi(image, blur_strength=(7, 7)):
     plt.title('Out + Cropped'), plt.xticks([]), plt.yticks([])
 
     plt.show()
-    """
-
     return box, out_c
 
 
