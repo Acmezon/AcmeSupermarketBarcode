@@ -9,6 +9,29 @@ import matplotlib.pyplot as plt
 from decimal import Decimal, ROUND_HALF_UP
 
 
+def get_lines_width(lines, start, end):
+    lines = lines[start:end]
+
+    control_first = lines[0:3]
+    control_end = lines[-3:]
+    control_middle = lines[27:31]
+
+    myround = np.vectorize(
+        lambda x: Decimal(Decimal(x).
+                          quantize(Decimal('1'), rounding=ROUND_HALF_UP)))
+
+    # Se obtiene el ancho base de una linea como la media del ancho de cada una
+    # de las lineas de control, redondeando hacia arriba
+    base_width = myround(
+        np.mean(np.hstack((control_first, control_middle, control_end))))
+
+    # Se obtiene el grosor de cada linea, relativo al grosor base, dividiendo
+    # el ancho original por el base y redondeando hacia arriba
+    lines_width = myround(lines / base_width)
+
+    return lines_width
+
+
 def decode_image(path, function_threshold=0, blur_strength=(7, 7)):
     """
     Toma la imagen de un codigo de barras y lo decodifica, devolviendo
@@ -45,31 +68,27 @@ def decode_image(path, function_threshold=0, blur_strength=(7, 7)):
     pos = np.concatenate(([0], pos + 1, [len(sample)]))
     lines = [b - a for (a, b) in zip(pos[:-1], pos[1:])]
 
-    control_first = lines[0:3]
-    control_end = lines[-3:]
-    control_middle = lines[27:31]
+    print(lines)
+    diff_2 = np.diff(np.abs(np.diff(lines)))
+    print(diff_2)
 
-    myround = np.vectorize(
-        lambda x: Decimal(Decimal(x).
-                          quantize(Decimal('1'), rounding=ROUND_HALF_UP)))
+    combinations = [[0, 0], [0, 1], [1, 0], [1, 1]]
 
-    # Se obtiene el ancho base de una linea como la media del ancho de cada una
-    # de las lineas de control, redondeando hacia arriba
-    base_width = myround(
-        np.mean(np.hstack((control_first, control_middle, control_end))))
+    lines_width = None
+    for combination in combinations:
+        start, end = np.where(diff_2 == combination[0])[0][0], np.where(
+            diff_2 == combination[1])[0][-1]
+        lines_width = get_lines_width(lines, start, end + 1 + 2)
+        # +1 porque no se incluye el final, +2 porque cada diff reduce el array
+        # en original en 1 posicion
 
-    # Se obtiene el grosor de cada linea, relativo al grosor base, dividiendo
-    # el ancho original por el base y redondeando hacia arriba
-    lines_width = myround(lines / base_width)
+        print(np.sum(lines_width))
+        if np.sum(lines_width) == 95:
+            break
 
-    """
-    ax = plt.subplot(1, 1, 1)
-    ax.set_ylim([0, 1.2])
-    plt.plot(np.arange(sample.shape[0]), sample)
-    plt.show()
+        lines_width = None
 
-    cv2.waitKey(0)
-    """
+    # cv2.waitKey(0)
 
     return lines_width
 
