@@ -23,14 +23,20 @@ def decode_image(path, function_threshold=0, blur_strength=(7, 7)):
 
     image = preproc.run(path, blur_strength)
 
+    image = cv2.bitwise_not(image)
     cv2.imshow("image", image)
 
+    sample = image[image.shape[0] / 2, :]
+    plt.subplot(1, 1, 1), plt.plot(np.arange(image.shape[1]), sample)
+    plt.show()
+
+    cv2.waitKey(0)
+
+    """
     # Se le aplica el detector de bordes de Canny
     canny_or = canny_edge(image, 200, 100)
     canny = cv2.bitwise_not(canny_or)
     cv2.imshow("canny_pre", canny)
-    
-    cv2.waitKey(0)
 
     # Se inicializa un vector de rhos y thetas que iran guardando los
     # valores encontrados para los distintos umbrales
@@ -131,6 +137,7 @@ def decode_image(path, function_threshold=0, blur_strength=(7, 7)):
 
     # Se devuelve el resultado
     return lines_width[0]
+    """
 
 
 def canny_edge(img, t_1, t_2, aperture=3, l2gradient=True):

@@ -54,7 +54,26 @@ def rotate_about_center(img, angle, scale=1.):
     return rotated_img
 
 
-def find_contours(image, blur_strength=(7, 7)):
+def box_angle(box):
+    x = box[:, 0]
+    x_diff = np.argmax(np.diff(x))
+    p1, p2 = box[1], box[2]
+
+    m_numerator = p1[1] - p2[1]
+    m_denominator = p2[0] - p1[0]
+
+    angle = np.rad2deg(math.atan2(m_numerator, m_denominator))
+
+    print(box)
+    print(m_numerator)
+    print(m_denominator)
+    print(math.atan2(m_numerator, m_denominator))
+    print(angle)
+
+    return angle
+
+
+def get_roi(image, blur_strength=(7, 7)):
     # compute the Scharr gradient magnitude representation of the images
     # in both the x and y direction
     gradX = cv2.Sobel(image, ddepth=cv2.CV_32F, dx=1, dy=0, ksize=-1)
@@ -120,19 +139,13 @@ def find_contours(image, blur_strength=(7, 7)):
     in_border = np.where(mask == 255)
 
     out[in_border[0], in_border[1]] = image[in_border[0], in_border[1]]
-    out = cv2.equalizeHist(out)
     cv2.imshow("out", out)
 
     out_c = out + mask_neg
 
-    (_, thresh) = cv2.threshold(
-        out, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-
-    thresh = cv2.adaptiveThreshold(
-        out_c, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2)
-    cv2.imshow("thresh", thresh)
     x, y = np.nonzero(out)
-    out_c = thresh[x.min():x.max() + 1, y.min():y.max() + 1]
+    out_c = out_c[x.min():x.max() + 1, y.min():y.max() + 1]
+
     cv2.imshow("out_c", out_c)
 
     plt.subplot(4, 2, 5), plt.imshow(closed, cmap='gray')
@@ -147,3 +160,8 @@ def find_contours(image, blur_strength=(7, 7)):
     plt.show()
 
     return box, out_c
+
+
+def get_barcode(image, blur_strength=(7, 7)):
+    box, out_c = get_roi(image, blur_strength)
+
