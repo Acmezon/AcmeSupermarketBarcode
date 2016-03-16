@@ -1,121 +1,64 @@
 # -*-coding:utf-8-*-
-import collections
-import cv2
-import matplotlib.pyplot as plt
-import numpy as np
+import barcode_read
+import math
+import traceback
+import translate_ean
 import time
+import os
 
 
-def current_milli_time():
-    return time.time()
+def main():
+    """
+    1. Se asume que la imagen es la básica, sencilla (incluso sintética),
+    se localiza perfectamente el codigo de barras, así que no se aplica
+    DFT, se pone el filtro a 5x5 y se lanza
 
+    2. Si falla, se sigue asumiendo imagen medianamente sencilla pero no
+    tanto, aun DFT a 0, se varía el filtro de a 6, 7, 4 y 3
 
-function_threshold = 55
+    3. Si todo lo anterior falla, DFT a 5, filtro a 5x5
 
-t = current_milli_time()
+    4. Si sigue fallando, DFT a 5, filtro a 6, 7, 4 y 3
 
-image = cv2.imread('resources/barcode.jpg')
-gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    5. Si sigue fallando, DFT a 1, filtro a 5, 6, 7, 4 y 3
+    """
+    dirname = './resources/'
+    blur_strengths = [(5, 5), (6, 6), (7, 7), (4, 4), (3, 3)]
+    inclination_ns = [0, 5, 1]
 
-(_, thresh) = cv2.threshold(
-    gray, 230, 255, cv2.THRESH_BINARY)
+    for fn in os.listdir(dirname):
+        success = False
+        i = 0
+        blur = 0
+        inclinations = 0
 
-thresh = np.uint8(thresh)
+        number = -1
+        while not success:
+            if i >= len(inclination_ns) * len(blur_strengths):
+                break
 
-canny = np.copy(thresh)
-cv2.Canny(thresh, 200, 100, canny, 3, True)
-cv2.imshow('Canny', canny)
+            print("Iteracion: {0}\nFuerza del emborronado:\
+                 {1}\nNumero de DFTs: {2}".format(
+                i+1, blur_strengths[blur], inclination_ns[inclinations]))
+            try:
+                lines = barcode_read.decode_image(
+                    'resources/test_3.jpg', tuple(blur_strengths[blur]),
+                    inclination_ns[inclinations])
+            except Exception:
+                lines = None
+                traceback.print_exc()
+            i += 1
+            blur = i % len(blur_strengths)
+            inclinations = math.floor(i / len(blur_strengths))
 
-rhos = np.array([])
-thetas = np.array([])
+            if lines is not None:
+                print(lines)
+                number = translate_ean.translate(lines)
 
-threshold = 1
-while True:
-    lines = cv2.HoughLines(
-            canny, 1, np.pi / 45, threshold, min_theta=-(np.pi / 6),
-            max_theta=np.pi / 6)
-    if lines is None:
-        break
+                if number != -1:
+                    success = True
 
-    lines = np.ravel(lines)
-    rhos = np.append(rhos, lines[::2])
-    thetas = np.append(thetas, lines[1::2])
+        print(number)
 
-    threshold += 1
-
-accum = {}
-for i in range(len(rhos)):
-    if (rhos[i], thetas[i]) in accum:
-        accum[(rhos[i], thetas[i])] += 1
-    else:
-        accum[(rhos[i], thetas[i])] = 1
-
-fig, ax = plt.subplots()
-
-rho_values = np.array([])
-votes = np.array([])
-
-accum = collections.OrderedDict(sorted(accum.items(), key=lambda k: k[0][0]))
-
-accum_values = collections.defaultdict(int)
-for k, v in accum.items():
-    accum_values[k[1]] += v
-
-accum_values = np.array(
-    list(accum_values.items()), dtype=[('x', 'f4'), ('y', 'i4')])
-
-theta = accum_values[np.argsort(accum_values, order=('y', 'x'))[-1]][0]
-
-print(theta)
-
-for key, val in accum.items():
-    if key[1] == theta:
-        rho_values = np.append(rho_values, np.array([key[0]]))
-        votes = np.append(votes, np.array([val]))
-
-high_votes = votes > function_threshold
-votes = votes[high_votes]
-rho_values = rho_values[high_votes]
-
-bars_start = rho_values[::2]
-bars_end = rho_values[1::2]
-
-bars_width = bars_end - bars_start
-
-rho_comp = np.arange(rho_values[0], rho_values[-1] + 1)
-votes_comp = np.zeros(rho_comp.shape)
-
-votes_indices = np.searchsorted(rho_comp, rho_values)
-votes_comp[votes_indices] = votes
-
-max_height = np.amax(votes_comp)
-high_lines = votes_comp > (max_height - 10)
-votes_comp[high_lines] = max_height
-
-min_height = np.amin(votes_comp[np.nonzero(votes_comp)])
-
-
-low_lines = np.where(votes_comp < (min_height + 15))
-votes_comp[np.intersect1d(low_lines, np.nonzero(votes_comp))] = min_height
-
-high_lines = np.where(votes_comp == max_height)
-control_first = high_lines[0][0:4]
-control_end = high_lines[0][-4:]
-control_middle = high_lines[0][8:12]
-
-base_width = np.around(np.mean(
-    np.concatenate((np.diff(control_first),
-                    np.diff(control_middle),
-                    np.diff(control_end)))))
-
-lines_width = np.around(np.diff(np.nonzero(votes_comp)) / base_width)
-
-bars = np.nonzero(votes_comp)
-# the histogram of the data
-ax.plot(rho_comp, votes_comp, '-o')
-plt.xlabel('rho')
-plt.ylabel('height')
-plt.title('90º Angle')
-plt.show()
-# cv2.imshow("Lines", image)
-# cv2.waitKey(0)
+if __name__ == "__main__":
+    main()

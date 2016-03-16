@@ -20,7 +20,6 @@ def main():
 
     5. Si sigue fallando, DFT a 1, filtro a 5, 6, 7, 4 y 3
 
-    6. Si nada de eso resulta, a la mierda
     """
     blur_strengths = [(5, 5), (6, 6), (7, 7), (4, 4), (3, 3)]
     inclination_ns = [0, 5, 1]
