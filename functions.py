@@ -50,7 +50,7 @@ def get_roi(image, blur_strength=(7, 7)):
     gradient = cv2.subtract(gradX, gradY)
     gradient = cv2.convertScaleAbs(gradient)
 
-    print(blur_strength)
+    # print(blur_strength)
     # blur and threshold the image
     blurred = cv2.blur(gradient, blur_strength)
 
@@ -60,7 +60,7 @@ def get_roi(image, blur_strength=(7, 7)):
     kernel = np.ones((20, 20), np.uint8)
     closed = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel)
 
-    """
+    
     plt.subplot(4, 2, 1), plt.imshow(image, cmap='gray')
     plt.title('Original'), plt.xticks([]), plt.yticks([])
     plt.subplot(4, 2, 2), plt.imshow(gradient, cmap='gray')
@@ -69,7 +69,7 @@ def get_roi(image, blur_strength=(7, 7)):
     plt.title('Threshold'), plt.xticks([]), plt.yticks([])
     plt.subplot(4, 2, 4), plt.imshow(closed, cmap='gray')
     plt.title('Closed'), plt.xticks([]), plt.yticks([])
-    """
+    
 
     # find the contours in the thresholded image, then sort the contours
     # by their area, keeping only the largest one
@@ -120,7 +120,7 @@ def get_roi(image, blur_strength=(7, 7)):
 
     # cv2.imshow("out_c", out_c)
 
-    """
+    
     plt.subplot(4, 2, 5), plt.imshow(closed, cmap='gray')
     plt.title('closed'), plt.xticks([]), plt.yticks([])
     plt.subplot(4, 2, 6), plt.imshow(mask, cmap='gray')
@@ -131,7 +131,7 @@ def get_roi(image, blur_strength=(7, 7)):
     plt.title('Out + Cropped'), plt.xticks([]), plt.yticks([])
 
     plt.show()
-    """
+    
 
     return box, out_c
 

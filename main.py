@@ -38,7 +38,7 @@ def main():
             i+1, blur_strengths[blur], inclination_ns[inclinations]))
         try:
             lines = barcode_read.decode_image(
-                'resources/test_3.jpg', tuple(blur_strengths[blur]),
+                'resources/test_40.jpg', tuple(blur_strengths[blur]),
                 inclination_ns[inclinations])
         except Exception:
             lines = None

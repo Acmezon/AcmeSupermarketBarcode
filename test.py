@@ -1,6 +1,8 @@
 # -*-coding:utf-8-*-
 import barcode_read
+import collections
 import math
+import numpy as np
 import traceback
 import translate_ean
 import time
@@ -25,40 +27,82 @@ def main():
     dirname = './resources/'
     blur_strengths = [(5, 5), (6, 6), (7, 7), (4, 4), (3, 3)]
     inclination_ns = [0, 5, 1]
+    times = []
+    config = []
+    results = []
 
     for fn in os.listdir(dirname):
+        print(fn)
         success = False
         i = 0
         blur = 0
         inclinations = 0
 
         number = -1
+        t = time.time()
         while not success:
             if i >= len(inclination_ns) * len(blur_strengths):
                 break
 
-            print("Iteracion: {0}\nFuerza del emborronado:\
+            """print("Iteracion: {0}\nFuerza del emborronado:\
                  {1}\nNumero de DFTs: {2}".format(
-                i+1, blur_strengths[blur], inclination_ns[inclinations]))
+                i + 1, blur_strengths[blur], inclination_ns[inclinations]))
+            """
             try:
                 lines = barcode_read.decode_image(
-                    'resources/test_3.jpg', tuple(blur_strengths[blur]),
+                    dirname + fn, tuple(blur_strengths[blur]),
                     inclination_ns[inclinations])
             except Exception:
                 lines = None
-                traceback.print_exc()
+                # traceback.print_exc()
             i += 1
             blur = i % len(blur_strengths)
             inclinations = math.floor(i / len(blur_strengths))
 
             if lines is not None:
-                print(lines)
                 number = translate_ean.translate(lines)
 
                 if number != -1:
                     success = True
 
+        elapsed = time.time() - t
+        times.append(elapsed)
+        results.append(success)
+
+        with open('results.txt', 'a') as f:
+            config_1 = config_2 = "-"
+            if success:
+                blur = (i - 1) % len(blur_strengths)
+                inclinations = math.floor((i - 1) / len(blur_strengths))
+                config_1 = blur_strengths[blur]
+                config_2 = inclination_ns[inclinations]
+                config.append(i - 1)
+
+            f.write("\n{0} {1} {2} {3} {4}".format(
+                fn, elapsed, int(success), config_1, config_2))
+
         print(number)
+
+    with open('results.txt', 'a') as f:
+        f.write("\n\n")
+        mean_time = np.mean(times)
+        proportion = np.count_nonzero(results) / len(results)
+
+        configs = collections.Counter(config)
+        most_common_config = configs.most_common(1)[0][0]
+        most_common_blur = most_common_config % len(blur_strengths)
+        most_common_inclination = math.floor(
+            most_common_config / len(blur_strengths))
+
+        f.write("\nAciertos: {0}".format(proportion * 100))
+        f.write("\nTiempo medio: {0}".format(mean_time))
+        f.write("\nMejor tiempo: {0}".format(np.amin(times)))
+        f.write("\nPeor tiempo: {0}".format(np.amax(times)))
+        f.write("\nMejor configuración:")
+        f.write("\n\tFuerza de emborronado: {0}".format(
+            blur_strengths[most_common_blur]))
+        f.write("\n\tNúmero de DFTs: {0}".format(
+            inclination_ns[most_common_inclination]))
 
 if __name__ == "__main__":
     main()

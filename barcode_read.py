@@ -84,7 +84,7 @@ def decode_image(path, blur_strength=(7, 7),
         # en original en 1 posicion
 
         lines_sum = np.sum(lines_width)
-        print(lines_sum)
+        # print(lines_sum)
         if lines_sum == 95:
             lines_res = lines_width
             break
