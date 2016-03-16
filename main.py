@@ -24,9 +24,9 @@ def main():
     blur_strengths = [(5, 5), (6, 6), (7, 7), (4, 4), (3, 3)]
     inclination_ns = [0, 5, 1]
     success = False
-    i = 0
-    blur = 0
-    inclinations = 0
+    i = 6
+    blur = i % len(blur_strengths)
+    inclinations = math.floor(i / len(blur_strengths))
 
     number = -1
     while not success:
@@ -38,7 +38,7 @@ def main():
             i+1, blur_strengths[blur], inclination_ns[inclinations]))
         try:
             lines = barcode_read.decode_image(
-                'resources/test_40.jpg', tuple(blur_strengths[blur]),
+                'resources/test_20.jpg', tuple(blur_strengths[blur]),
                 inclination_ns[inclinations])
         except Exception:
             lines = None

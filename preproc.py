@@ -15,6 +15,6 @@ def run(in_file, blur_strength=(7, 7), inclination_n=5):
     image = dft.run(in_file, inclination_n)
 
     barcode = functions.get_barcode(image, blur_strength)
-    cv2.imshow("barcode", barcode)
+    # cv2.imshow("barcode", barcode)
 
     return barcode

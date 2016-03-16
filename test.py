@@ -25,6 +25,11 @@ def main():
     5. Si sigue fallando, DFT a 1, filtro a 5, 6, 7, 4 y 3
     """
     dirname = './resources/'
+    results_f = 'results.txt'
+    # Crea o vacia el fichero, si ya existia
+    with open(results_f, 'w') as f:
+        pass
+
     blur_strengths = [(5, 5), (6, 6), (7, 7), (4, 4), (3, 3)]
     inclination_ns = [0, 5, 1]
     times = []
@@ -69,7 +74,7 @@ def main():
         times.append(elapsed)
         results.append(success)
 
-        with open('results.txt', 'a') as f:
+        with open(results_f, 'a') as f:
             config_1 = config_2 = "-"
             if success:
                 blur = (i - 1) % len(blur_strengths)
@@ -83,26 +88,20 @@ def main():
 
         print(number)
 
-    with open('results.txt', 'a') as f:
+    with open(results_f, 'a') as f:
         f.write("\n\n")
         mean_time = np.mean(times)
         proportion = np.count_nonzero(results) / len(results)
 
         configs = collections.Counter(config)
-        most_common_config = configs.most_common(1)[0][0]
-        most_common_blur = most_common_config % len(blur_strengths)
-        most_common_inclination = math.floor(
-            most_common_config / len(blur_strengths))
 
         f.write("\nAciertos: {0}".format(proportion * 100))
+        f.write("\nTiempo: {0}".format(np.sum(times)))
         f.write("\nTiempo medio: {0}".format(mean_time))
         f.write("\nMejor tiempo: {0}".format(np.amin(times)))
         f.write("\nPeor tiempo: {0}".format(np.amax(times)))
-        f.write("\nMejor configuración:")
-        f.write("\n\tFuerza de emborronado: {0}".format(
-            blur_strengths[most_common_blur]))
-        f.write("\n\tNúmero de DFTs: {0}".format(
-            inclination_ns[most_common_inclination]))
+        f.write("\nMejores configuraciones:")
+        f.write("\n\t{0}".format(configs))
 
 if __name__ == "__main__":
     main()
