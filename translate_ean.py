@@ -20,9 +20,6 @@ def translate_to_binary(lines_spaces_vector):
 def translate_byte_left(binary_code, parity_digit, group):
     """
     Translate a single 7-bits code to its number code format.
-        Input:
-            binary_code: Numpy array.
-            side: int 0/1. 0: Left, 1: Right.
     """
     bin_string = ""
 
@@ -77,8 +74,7 @@ def translate_byte_right(binary_code):
     """
     Translate a single 7-bits code to its number code format.
         Input:
-            binary_code: N,umpy array.
-            side: int 0/1. 0: Left, 1: Right.
+            binary_code: Numpy array.
     """
     bin_string = ""
 
