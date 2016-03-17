@@ -1,6 +1,7 @@
 # -*-coding:utf-8-*-
 import numpy as np
 
+
 def translate_to_binary(lines_spaces_vector):
     """
     Translate lines-spaces vector to a binary code
@@ -172,7 +173,7 @@ def translate(vector):
                     parity += "E"
             else:
                 raise ValueError("Error: Group " + str(group) +
-                      " wrong format. Parity not matching.")
+                                 " wrong format. Parity not matching.")
                 return -1
 
         parity_digit = get_parity_digit(parity)
@@ -193,5 +194,6 @@ def translate(vector):
             return -1
 
     else:
-        raise ValueError('Error: Wrong format. Incorrent barcode length or frontier bars not matching.')
+        raise ValueError('Error: Wrong format. Incorrent barcode length or \
+                            frontier bars not matching.')
         return -1

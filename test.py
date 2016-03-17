@@ -4,8 +4,11 @@ import collections
 import math
 import numpy as np
 from shutil import copyfile
+import os
+import time
 import traceback
 import translate_ean
+
 
 def main():
     """
@@ -67,6 +70,7 @@ def main():
             if lines is not None:
                 try:
                     number = translate_ean.translate(lines)
+                    copyfile(dirname + fn, dst_folder + fn)
                     success = True
                 except Exception:
                     success = False
