@@ -3,6 +3,7 @@ import barcode_read
 import collections
 import math
 import numpy as np
+from shutil import copyfile
 import traceback
 import translate_ean
 import time
@@ -26,6 +27,7 @@ def main():
     """
     dirname = './resources/'
     results_f = 'results.txt'
+    dst_folder = './results/'
     # Crea o vacia el fichero, si ya existia
     with open(results_f, 'w') as f:
         pass
@@ -69,6 +71,7 @@ def main():
 
                 if number != -1:
                     success = True
+                    copyfile(dirname + fn, dst_folder + fn)
 
         elapsed = time.time() - t
         times.append(elapsed)
