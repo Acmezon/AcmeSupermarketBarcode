@@ -1,0 +1,1 @@
+Puede consultar el manual de instalación desde el archivo README.MD o desde la página principal del respositorio público.
