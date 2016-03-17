@@ -1,5 +1,5 @@
+# -*-coding:utf-8-*-
 import numpy as np
-
 
 def translate_to_binary(lines_spaces_vector):
     """
@@ -7,10 +7,9 @@ def translate_to_binary(lines_spaces_vector):
     """
     r = []
     is_line = True
-    # print(lines_spaces_vector)
 
     if np.any(lines_spaces_vector > 7) or np.any(lines_spaces_vector < 0):
-        print('Error: Incorrect image bars/spaces transcription')
+        raise ValueError('Error: Incorrect image bars/spaces transcription')
     else:
         for n in lines_spaces_vector:
             r = np.append(r, np.repeat(int(is_line), n))
@@ -176,7 +175,7 @@ def translate(vector):
                 else:
                     parity += "E"
             else:
-                print("Error: Group " + str(group) +
+                raise ValueError("Error: Group " + str(group) +
                       " wrong format. Parity not matching.")
                 return -1
 
@@ -194,11 +193,9 @@ def translate(vector):
         if checksum(barcode):
             return barcode
         else:
-            print("Error: Checksum failed.")
+            raise ValueError('Error: Checksum failed.')
             return -1
 
     else:
-        print(
-            "Error: Wrong format. Incorrent barcode \
-            length or frontier bars not matching.")
+        raise ValueError('Error: Wrong format. Incorrent barcode length or frontier bars not matching.')
         return -1

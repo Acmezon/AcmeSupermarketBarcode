@@ -1,15 +1,18 @@
 # -*-coding:utf-8-*-
 import collections
 import cv2
-import preproc
-import numpy as np
 import math
 import matplotlib.pyplot as plt
+import numpy as np
+import preproc
 
 from decimal import Decimal, ROUND_HALF_UP
 
 
 def get_lines_width(lines, start, end, iteration):
+    """
+    Get lines and converts to run-length encoding.
+    """
     lines = lines[start:end]
 
     control_first = lines[0:3]
@@ -48,7 +51,6 @@ def decode_image(path, blur_strength=(7, 7),
     image = preproc.run(path, blur_strength, inclination_n)
 
     image = cv2.bitwise_not(image)
-    # cv2.imshow("image", image)
 
     sample = image[image.shape[0] / 2, :]
 
@@ -63,8 +65,7 @@ def decode_image(path, blur_strength=(7, 7),
     generated_barcode[:, np.where(sample == 1)] = 255
     generated_barcode = 255 - generated_barcode
 
-    """cv2.imwrite("generated_barcode.jpg", generated_barcode)
-    cv2.imshow("generated_barcode.jpg", generated_barcode)"""
+    #cv2.imwrite("generated_barcode.jpg", generated_barcode)
 
     non_zero = np.nonzero(sample)
     first_non_zero, last_non_zero = non_zero[0][0], non_zero[0][-1] + 1
@@ -75,9 +76,11 @@ def decode_image(path, blur_strength=(7, 7),
     if first_non_zero > 0:
         sample = np.delete(sample, np.s_[0:first_non_zero])
 
+    """
     plt.subplot(1, 2, 2)
     plt.plot(sample)
-    # plt.show()
+    plt.show()
+    """
 
     pos, = np.where(np.diff(sample) != 0)
     pos = np.concatenate(([0], pos + 1, [len(sample)]))
@@ -98,7 +101,6 @@ def decode_image(path, blur_strength=(7, 7),
         # en original en 1 posicion
 
         lines_sum = np.sum(lines_width)
-        # print(lines_sum)
         if lines_sum == 95:
             lines_res = lines_width
             break
@@ -132,7 +134,5 @@ def decode_image(path, blur_strength=(7, 7),
 
     if np.sum(lines_res) != 95:
         lines_res = None
-
-    # cv2.waitKey(0)
 
     return lines_res

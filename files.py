@@ -1,4 +1,6 @@
+# -*-coding:utf-8-*-
 import os
+
 dirname = './resources/'
 i = 0
 for fn in os.listdir(dirname):

@@ -3,11 +3,10 @@ import barcode_read
 import collections
 import math
 import numpy as np
+import os
+import time
 import traceback
 import translate_ean
-import time
-import os
-
 
 def main():
     """
@@ -49,7 +48,8 @@ def main():
             if i >= len(inclination_ns) * len(blur_strengths):
                 break
 
-            """print("Iteracion: {0}\nFuerza del emborronado:\
+            """
+            print("Iteracion: {0}\nFuerza del emborronado:\
                  {1}\nNumero de DFTs: {2}".format(
                 i + 1, blur_strengths[blur], inclination_ns[inclinations]))
             """
@@ -65,10 +65,11 @@ def main():
             inclinations = math.floor(i / len(blur_strengths))
 
             if lines is not None:
-                number = translate_ean.translate(lines)
-
-                if number != -1:
+                try:
+                    number = translate_ean.translate(lines)
                     success = True
+                except Exception:
+                    success = False
 
         elapsed = time.time() - t
         times.append(elapsed)
