@@ -1,11 +1,12 @@
 # -*-coding:utf-8-*-
+import argparse
 import barcode_read
 import math
 import traceback
 import translate_ean
 
 
-def main():
+def run(image_path):
     """
     1. Se asume que la imagen es la básica, sencilla (incluso sintética),
     se localiza perfectamente el codigo de barras, así que no se aplica
@@ -32,13 +33,9 @@ def main():
     while not success:
         if i >= len(inclination_ns) * len(blur_strengths):
             break
-
-        print("Iteracion: {0}\nFuerza del emborronado:\
-             {1}\nNumero de DFTs: {2}".format(
-            i+1, blur_strengths[blur], inclination_ns[inclinations]))
         try:
             lines = barcode_read.decode_image(
-                'resources/tatuaje.png', tuple(blur_strengths[blur]),
+                image_path, tuple(blur_strengths[blur]),
                 inclination_ns[inclinations])
         except Exception:
             lines = None
@@ -48,14 +45,17 @@ def main():
         inclinations = math.floor(i / len(blur_strengths))
 
         if lines is not None:
-            print(lines)
-            number = translate_ean.translate(lines)
-
-            if number != -1:
+            try:
+                number = translate_ean.translate(lines)
                 success = True
+            except Exception:
+                success = False
 
     print(number)
     return number
 
 if __name__ == "__main__":
-    main()
+    ap = argparse.ArgumentParser()
+    ap.add_argument("-p", "--path", required = True, help = "Path to the image file")
+    args = vars(ap.parse_args())
+    run(args["path"])

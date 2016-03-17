@@ -1,11 +1,20 @@
+# -*-coding:utf-8-*-
 import cv2
 import math
 import numpy as np
 
 from matplotlib import pyplot as plt
 
-
 def rotate_about_center(img, angle, scale=1.):
+    """
+    Rotates a image about its centre with correct crop.
+        Input:
+            img: Input image
+            angle: Angle in degrees.
+            scale: Re-scaling. Default:1
+        Outout:
+            Rotated & cropped image
+    """
     img = cv2.bitwise_not(img)
     w = img.shape[1]
     h = img.shape[0]
@@ -41,6 +50,14 @@ def rotate_about_center(img, angle, scale=1.):
 
 
 def get_roi(image, blur_strength=(7, 7)):
+    """
+    Detect region of interest (barcode) and crop the input image to adjust to it.
+        Input:
+            image: Input image.
+            blur_strength = Average filter mask size.
+        Output:
+            Cropped image with the barcode.
+    """
     # compute the Scharr gradient magnitude representation of the images
     # in both the x and y direction
     gradX = cv2.Sobel(image, ddepth=cv2.CV_32F, dx=1, dy=0, ksize=-1)
@@ -50,7 +67,6 @@ def get_roi(image, blur_strength=(7, 7)):
     gradient = cv2.subtract(gradX, gradY)
     gradient = cv2.convertScaleAbs(gradient)
 
-    # print(blur_strength)
     # blur and threshold the image
     blurred = cv2.blur(gradient, blur_strength)
 
@@ -109,16 +125,11 @@ def get_roi(image, blur_strength=(7, 7)):
     in_border = np.where(mask == 255)
 
     out[in_border[0], in_border[1]] = image[in_border[0], in_border[1]]
-    # cv2.imshow("out", out)
 
     out_c = out + mask_neg
 
     x, y = np.nonzero(out)
     out_c = out_c[x.min():x.max() + 1, y.min():y.max() + 1]
-
-    # _, out_c = cv2.threshold(out_c, 127, 255, cv2.THRESH_BINARY)
-
-    # cv2.imshow("out_c", out_c)
 
     """
     plt.subplot(4, 2, 5), plt.imshow(closed, cmap='gray')

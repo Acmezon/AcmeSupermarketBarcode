@@ -1,10 +1,8 @@
+# -*-coding:utf-8-*-
 import cv2
 import functions
 import math
 import numpy as np
-
-from PIL import Image
-
 
 def run(in_file, n=2):
     """
