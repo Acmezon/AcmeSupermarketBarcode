@@ -5,6 +5,12 @@ Aplicación AcmeSupermarketBarcode para el preprocesamiento, detección y decodi
 * Daniel de los Reyes Leal
 * Alejandro Sánchez Medina
 
+## Ejecución
+* Para ejecutar la decodificación con una imagen concreta. (Se admiten formatos .jpg y .png)
+ * <code>python3 main.py -p "RUTA_AL_ARCHIVO"</code>
+* Para ejecutar la bateria de pruebas con las imágenes de la carpeta /resources
+ * <code>python3 test.py</code>
+
 ## Instalación
 * Actualizar las bases de datos de repositorios
  * <code>sudo apt-get update</code>
@@ -69,3 +75,10 @@ Aplicación AcmeSupermarketBarcode para el preprocesamiento, detección y decodi
  * <code>git clone https://github.com/matplotlib/matplotlib.git</code>
  * <code>cd matplotlib</code>
  * <code>python setup.py install</code>
+
+ ## Referencias
+* Chai, D. and Hock, F. (2005.). “Locating and Decoding EAN-13 Barcodes from Images Captured by Digital Cameras”. 2005 5th International Conference on Information Communications & Signal Processing. Bangkok. pp.. 1595 - 1599.
+* Belussi, Luiz F. F.; Hirata, Nina S. T. (2011). “Fast QR Code Detection in Arbitrarily Acquired Images”.  Graphics, Patterns and Images (Sibgrapi), 2011 24th SIBGRAPI Conference. IEEE. Maceio, Alagoas. pp. 281 - 288
+* Meng Wang, Li-Na Li, Zhao-Xuan Yang. “Gabor Filtering-Based Scale and Rotation Invariance feature for 2D Barcode Region Detection”. 20I0 International Conference on Computer Application and System Modeling. IEEE. Tianjin, China. 2010. Vol 5. pp.. 34 - 37.
+* Viola, Paul; Jones, Michael (2001). “Rapid object detection using a boosted cascade of simple features”. Computer Vision and Pattern Recognition, 2001. CVPR 2001. Proceedings of the 2001 IEEE Computer Society Conference. IEEE. Kauai, HI, USA. Vol. 1. pp. I-511 - I-518.
+* Maragos, P. (2013). “Representations for Morphological Image Operators and Analogies with Linear Operators”. In Advances in Imaging and Electron Physics, vol. 177 (edited by P.W. Hawkes), pp. 45-187
