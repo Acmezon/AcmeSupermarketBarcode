@@ -65,7 +65,7 @@ def decode_image(path, blur_strength=(7, 7),
     generated_barcode[:, np.where(sample == 1)] = 255
     generated_barcode = 255 - generated_barcode
 
-    #cv2.imwrite("generated_barcode.jpg", generated_barcode)
+    # cv2.imwrite("generated_barcode.jpg", generated_barcode)
 
     non_zero = np.nonzero(sample)
     first_non_zero, last_non_zero = non_zero[0][0], non_zero[0][-1] + 1
@@ -109,6 +109,7 @@ def decode_image(path, blur_strength=(7, 7),
             combination_res = combination
             lines_res = lines_width
 
+    """
     if 90 < max_sum and max_sum < 95:
         i = 0
         while True:
@@ -131,6 +132,7 @@ def decode_image(path, blur_strength=(7, 7),
             if np.sum(lines_width) <= 95:
                 lines_res = lines_width
                 break
+    """
 
     if np.sum(lines_res) != 95:
         lines_res = None

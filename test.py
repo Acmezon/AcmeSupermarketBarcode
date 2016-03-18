@@ -26,7 +26,7 @@ def main():
     5. Si sigue fallando, DFT a 1, filtro a 5, 6, 7, 4 y 3
     """
     dirname = './resources/'
-    results_f = 'results.txt'
+    results_f = 'results_no_enhancement.txt'
     dst_folder = './results/'
     # Crea o vacia el fichero, si ya existia
     with open(results_f, 'w') as f:
